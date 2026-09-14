@@ -8,9 +8,9 @@ AI-Powered Supply Chain Disruption Assistant & Fleet Utilisation Optimizer
 
 | Field | Value |
 |---|---|
-| **Team Name** | [TEAM NAME - TechSquad] |
+| **Team Name** | [TechSquad] |
 | **Track** | AI |
-| **Team Lead** | [TEAM LEAD NAME - Niyati Barochia] — [TEAM LEAD EMAIL - 24dce009@charusat.edu.in] |
+| **Team Lead** | [ Niyati Barochia] — [24dce009@charusat.edu.in] |
 | **Members** | [Drashti Dedaniya], [Priyanshi Patel], [Palak Bhut] |
 
 ---
