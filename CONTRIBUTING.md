@@ -1,53 +1,109 @@
-# Contributing Guidelines — SupplyGuard AI
+# How to Submit Your Hackathon Entry
 
-Welcome to the **SupplyGuard AI** project for the IBM Bob AI Hackathon 2026.
-
-This project is designed to support modular, parallel development across 4 team members. To maintain code quality, clarity, and consistency, all contributors must follow the principles and workflow outlined below.
-
----
-
-## 1. Core Development Principles
-
-1. **Independent Module Architecture:**
-   - Frontend, backend, AI data processing, and IBM Bob integration modules must remain cleanly separated with distinct boundaries.
-   - No team member's module should depend on another member's internal implementation details.
-   - All cross-module interactions must take place strictly via documented REST APIs, JSON schemas, or clear interface contracts.
-
-2. **Pre-Implementation Alignment:**
-   Before coding features in Phase 2, the team will formally agree upon:
-   - Data models & entity schemas (Shipments, Disruptions, Fleet Assets, IoT Logs)
-   - REST API endpoint contracts & payload shapes
-   - Shared input/output file formats
-   - Git branching & commit conventions
-
-3. **Code Quality Standards:**
-   - **No Hardcoded Credentials:** Never check secrets, API keys, or database URIs into git. Always use environment variables (`.env`).
-   - **No Fake Functional Claims:** Do not commit hardcoded mock responses as working AI models or backend functionality.
-   - **Clean Directory Hygiene:** Keep all files in their designated directories.
-   - **Self-Documenting Code:** Write clear docstrings and comments for core functions and interfaces.
+Follow these steps to set up your submission repository correctly.
+The judges depend on this structure to review your entry — deviations may affect your score.
 
 ---
 
-## 2. Shared Interfaces & Module Boundaries
+## Step 1 — Fork This Template
 
-| Module | Responsibility | Primary Directory |
-| :--- | :--- | :--- |
-| **Frontend UI** | User dashboard, interactive maps, excursion alerts, decision support UI | `src/frontend/` |
-| **Backend API** | API routes, data persistence, disruption scoring, alert routing | `src/backend/` |
-| **AI Engine** | Disruption mapping, alternative route recommendation, fleet optimization | `src/backend/` / `src/ai/` |
-| **IBM Bob Assistant** | Conversational support engine, decision rationale generation | `src/backend/` |
-
----
-
-## 3. Git Branching Strategy
-
-- **`main`**: Production-ready, stable codebase.
-- **`feature/<module-name>`**: Dedicated feature branches created per task after team alignment.
-- **Pull Requests:** All changes to `main` must be submitted via Pull Request with code review by at least one team member.
+1. Click the **"Use this template"** button at the top of this repository
+   (or **Fork** if you prefer)
+2. Name your repository: `bob-ai-hackathon-[your-team-name]`
+   (e.g., `bob-ai-hackathon-orion-squad`)
+3. Set visibility to **Public** so judges can access it
+4. Click **Create repository**
 
 ---
 
-## 4. Environment Safety
+## Step 2 — Clone Your Fork Locally
 
-- Ensure `.env` is listed in `.gitignore`.
-- Provide environment variable templates (`.env.example`) when adding new required settings.
+```bash
+git clone https://github.com/[your-org]/bob-ai-hackathon-[your-team-name].git
+cd bob-ai-hackathon-[your-team-name]
+```
+
+---
+
+## Step 3 — Fill in the Required Files
+
+Work through these files in order:
+
+### 3a. `submission.yaml` ← **Start here**
+This is the most important file. Judges use it to get an overview of your entry.
+
+- Open [`submission.yaml`](submission.yaml)
+- Fill in **every field marked `# REQUIRED`**
+- Read the inline comments — they explain what each field expects
+
+### 3b. `README.md`
+- Replace every `[placeholder in brackets]` with your actual content
+
+### 3c. `docs/`
+Fill in all four documentation files:
+| File | What to write |
+|---|---|
+| [`docs/problem-statement.md`](docs/problem-statement.md) | The problem you're solving |
+| [`docs/solution-overview.md`](docs/solution-overview.md) | How your solution works |
+| [`docs/architecture.md`](docs/architecture.md) | Technical architecture diagram |
+| [`docs/setup-guide.md`](docs/setup-guide.md) | Exact steps to run your project |
+
+### 3d. `src/`
+- Put all your source code inside [`src/`](src/)
+- Copy [`src/.env.example`](src/.env.example) and add your environment variables to it
+- **Never commit a real `.env` file** — it is already in `.gitignore`
+
+### 3e. `demo/`
+| File | What to do |
+|---|---|
+| [`demo/demo-video-link.txt`](demo/demo-video-link.txt) | Replace placeholder URL with your real video link |
+| [`demo/live-demo-url.txt`](demo/live-demo-url.txt) | Add your deployed demo URL (or write "NOT DEPLOYED") |
+| [`demo/screenshots/`](demo/screenshots/) | Add 3+ screenshots named `01-*.png`, `02-*.png`, etc. |
+
+### 3f. `presentation/`
+- Add your slide deck as [`presentation/slides.pdf`](presentation/) (preferred) or `.pptx`
+
+---
+
+## Step 4 — Verify Your Submission Passes Validation
+
+Every push to your repository triggers the **Validate Submission** GitHub Action automatically.
+
+To check manually:
+1. Go to your repo on GitHub
+2. Click the **Actions** tab
+3. Look for **✅ Validate Submission**
+4. A green checkmark means your submission is structurally complete
+5. A red X means something is missing — click the run to see what
+
+---
+
+## Step 5 — Submit Your Repository URL
+
+Once validation passes:
+
+1. Copy your repository URL:
+   `https://github.com/[your-org]/bob-ai-hackathon-[your-team-name]`
+
+2. Submit it via the **official entry form** at the hackathon portal.
+
+---
+
+## Team Collaboration & Parallel Modular Development Guidelines
+
+This project supports modular, parallel development across 4 team members. All contributors must follow the rules outlined below:
+
+### 1. Independent Module Architecture
+- **Module A (Member 1):** Frontend UI & mock API services (`src/frontend/`)
+- **Module B (Member 2):** Shipment + Disruption + Route services (`src/backend/controllers/shipmentController.js`, `disruptionController.js`, `routeController.js`)
+- **Module C (Member 3):** AI recommendation & IBM Bob services (`src/ai/**`, `aiController.js`, `bobController.js`)
+- **Module D (Member 4):** Fleet + Cold-Chain services (`src/backend/controllers/fleetController.js`, `coldChainController.js`)
+
+### 2. Contract-First Development
+- All inter-module communication occurs via documented REST endpoints (`docs/api-contract.md`) and standard JSON envelopes (`{ success: true, data: {}, message: "" }`).
+- Developers use mock datasets (`src/*/mock/mockData.json`) for offline testing prior to backend integration.
+
+### 3. Git Branching Rules
+- Work exclusively on your designated branch (`feature/frontend`, `feature/shipment-disruption`, `feature/ai-bob`, `feature/fleet-coldchain`).
+- Submit Pull Requests to merge into `main`. Never push directly to `main`.
+- Never commit real credentials or `.env` files.

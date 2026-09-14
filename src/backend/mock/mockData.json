@@ -1,0 +1,176 @@
+{
+  "scenario": "SupplyGuard AI Comprehensive Hackathon Demonstration Dataset",
+  "version": "1.0.0",
+  "shipments": [
+    {
+      "shipmentId": "shp_2001",
+      "trackingNumber": "TRK-982341",
+      "origin": "Mumbai",
+      "destination": "Delhi",
+      "currentLocation": "Surat",
+      "cargoType": "Pharmaceuticals (Vaccines)",
+      "priority": "critical",
+      "status": "in_transit",
+      "routeId": "route_101",
+      "disruptionId": "dis_3001",
+      "temperatureSensitive": true,
+      "requiredTemperatureRange": { "min": 2, "max": 8 }
+    },
+    {
+      "shipmentId": "shp_2002",
+      "trackingNumber": "TRK-104928",
+      "origin": "Chennai",
+      "destination": "Bengaluru",
+      "currentLocation": "Vellore",
+      "cargoType": "Electronics",
+      "priority": "medium",
+      "status": "in_transit",
+      "routeId": "route_103",
+      "disruptionId": null,
+      "temperatureSensitive": false,
+      "requiredTemperatureRange": null
+    },
+    {
+      "shipmentId": "shp_2003",
+      "trackingNumber": "TRK-554109",
+      "origin": "Kolkata",
+      "destination": "Nagpur",
+      "currentLocation": "Raipur",
+      "cargoType": "Fresh Produce",
+      "priority": "high",
+      "status": "delayed",
+      "routeId": "route_104",
+      "disruptionId": "dis_3003",
+      "temperatureSensitive": true,
+      "requiredTemperatureRange": { "min": 4, "max": 10 }
+    }
+  ],
+  "disruptions": [
+    {
+      "disruptionId": "dis_3001",
+      "title": "Severe Coastal Blizzard & Flash Flood",
+      "type": "weather",
+      "severity": "critical",
+      "location": "Surat",
+      "affectedArea": "Surat-Mumbai Corridor A3",
+      "startTime": "2026-03-14T08:00:00.000Z",
+      "status": "active"
+    },
+    {
+      "disruptionId": "dis_3002",
+      "title": "Jawaharlal Nehru Port Dockers Strike",
+      "type": "portStrike",
+      "severity": "high",
+      "location": "Navi Mumbai",
+      "affectedArea": "JNPT Freight Terminal Zone",
+      "startTime": "2026-03-13T18:00:00.000Z",
+      "status": "active"
+    },
+    {
+      "disruptionId": "dis_3003",
+      "title": "National Highway 53 Hillside Landslide",
+      "type": "roadClosure",
+      "severity": "medium",
+      "location": "Raipur Pass",
+      "affectedArea": "NH-53 East-West Trade Route",
+      "startTime": "2026-03-14T04:30:00.000Z",
+      "status": "active"
+    }
+  ],
+  "routes": [
+    {
+      "routeId": "route_101",
+      "routeName": "Primary Western Corridor (NH-48)",
+      "origin": "Mumbai",
+      "destination": "Delhi",
+      "waypoints": ["Mumbai", "Surat", "Ahmedabad", "Delhi"],
+      "transportMode": "road",
+      "distanceKm": 1400,
+      "estimatedDurationHours": 24,
+      "riskScore": 0.92,
+      "availability": false
+    },
+    {
+      "routeId": "route_102",
+      "routeName": "Southern Bypass Corridor (B12 / NH-52)",
+      "origin": "Mumbai",
+      "destination": "Delhi",
+      "waypoints": ["Mumbai", "Pune", "Indore", "Gwalior", "Delhi"],
+      "transportMode": "road",
+      "distanceKm": 1520,
+      "estimatedDurationHours": 26.5,
+      "riskScore": 0.15,
+      "availability": true
+    }
+  ],
+  "fleet": [
+    {
+      "fleetAssetId": "flt_5001",
+      "assetName": "Reefer Truck 01 (ColdGuard Heavy Duty)",
+      "transportMode": "refrigerated_truck",
+      "capacity": 20,
+      "currentLocation": "Surat",
+      "status": "idle",
+      "utilizationPercentage": 0,
+      "assignedShipmentId": null
+    },
+    {
+      "fleetAssetId": "flt_5002",
+      "assetName": "Express Freight Container Vessel V-90",
+      "transportMode": "vessel",
+      "capacity": 450,
+      "currentLocation": "Chennai Port",
+      "status": "active",
+      "utilizationPercentage": 88,
+      "assignedShipmentId": "shp_2002"
+    }
+  ],
+  "coldChainSensors": [
+    {
+      "sensorId": "sns_7001",
+      "shipmentId": "shp_2001",
+      "targetTempMin": 2,
+      "targetTempMax": 8,
+      "isActive": true
+    },
+    {
+      "sensorId": "sns_7002",
+      "shipmentId": "shp_2003",
+      "targetTempMin": 4,
+      "targetTempMax": 10,
+      "isActive": true
+    }
+  ],
+  "temperatureReadings": [
+    {
+      "readingId": "tmp_9001",
+      "sensorId": "sns_7001",
+      "shipmentId": "shp_2001",
+      "timestamp": "2026-03-14T10:15:30.000Z",
+      "temperatureCelsius": 14.2,
+      "isExcursion": true,
+      "severity": "critical"
+    },
+    {
+      "readingId": "tmp_9002",
+      "sensorId": "sns_7002",
+      "shipmentId": "shp_2003",
+      "timestamp": "2026-03-14T10:10:00.000Z",
+      "temperatureCelsius": 5.4,
+      "isExcursion": false,
+      "severity": "normal"
+    }
+  ],
+  "aiRecommendations": [
+    {
+      "recommendationId": "rec_8001",
+      "type": "reroute_and_redeploy",
+      "entityId": "shp_2001",
+      "riskLevel": "critical",
+      "recommendation": "Reroute shipment shp_2001 via Southern Corridor B12 and deploy idle Reefer flt_5001",
+      "reason": "Shipment shp_2001 is stranded by disruption dis_3001 with active 14.2°C temperature excursion. Route B12 bypasses storm and flt_5001 is idle in Surat.",
+      "confidence": 0.95,
+      "createdAt": "2026-03-14T10:15:30.000Z"
+    }
+  ]
+}

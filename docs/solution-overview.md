@@ -1,84 +1,35 @@
-# Solution Overview — SupplyGuard AI
+# Solution Overview
 
-SupplyGuard AI is an AI-powered supply chain decision-support platform designed to provide proactive intelligence during major supply chain disruptions and cold-chain emergencies.
+## What We Built
+SupplyGuard AI is an AI-powered supply chain decision-support platform designed to protect shipments during severe disruptions, optimize regional fleet asset utilization, and detect cold-chain temperature excursions before cargo loss occurs.
 
----
+## How It Works
 
-## Conceptual Architecture & Core Components
+1. **Data Ingestion:** Continuously ingests active shipment itineraries, disruption geofences (weather, strikes, road closures), fleet telematics, and IoT cold-chain sensor streams.
+2. **Disruption & Impact Analysis:** Correlates shipment vectors against disruption zones to identify compromised or delayed cargo in real time.
+3. **Alternative Rerouting & Fleet Optimization:** Evaluates alternative transit corridors to bypass bottlenecked areas and identifies nearby idle refrigerated fleet assets for dynamic redeployment.
+4. **Cold-Chain Excursion Detection:** Tracks thermal sensor logs against safe operating thresholds (e.g., 2°C–8°C) and tags excursions with severity levels (`normal`, `warning`, `critical`).
+5. **IBM Bob Conversational Decision Support:** Synthesizes operational metrics into natural-language risk summaries and prioritized, actionable recommendations for supply chain operators.
+
+## Architecture Diagram
+
+> See [`architecture.md`](architecture.md) for the detailed diagram.
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                           1. DATA INGESTION                                  │
-│   (Shipment Logs, Weather Alerts, Port Status, Fleet IoT Telemetry)          │
-└──────────────────────┬──────────────────────────────────────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                       2. DISRUPTION ANALYSIS                                 │
-│   (Geofencing disruption events, risk level evaluation, impact radius)      │
-└──────────────────────┬──────────────────────────────────────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    3. SHIPMENT IMPACT ANALYSIS                              │
-│   (Mapping active cargo vectors against disruption zones & delays)          │
-└──────────────────────┬──────────────────────────────────────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│               4. ROUTE / CARRIER RECOMMENDATION ENGINE                      │
-│   (Evaluating alternative transit corridors, cost, and carrier capacity)     │
-└──────────────────────┬──────────────────────────────────────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                 5. FLEET UTILIZATION ANALYSIS                               │
-│   (Identifying idle containers, trucks, vessels & redeployment plans)        │
-└──────────────────────┬──────────────────────────────────────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    6. COLD-CHAIN MONITORING ENGINE                          │
-│   (Telemetry tracking, excursion threshold detection & severity scoring)     │
-└──────────────────────┬──────────────────────────────────────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        7. AI RECOMMENDATIONS                                 │
-│   (Prioritized action triggers, risk scoring, operational alerts)            │
-└──────────────────────┬──────────────────────────────────────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│             8. IBM BOB CONVERSATIONAL DECISION SUPPORT                       │
-│   (Natural language querying, scenario synthesis, operator guidance)         │
-└─────────────────────────────────────────────────────────────────────────────┘
+[Data Feeds] → [Backend APIs] → [AI Analysis Engine] → [IBM Bob Assistant] → [Operator Dashboard]
+                                       ↓
+                                [MongoDB Store]
 ```
 
----
+## Key Design Decisions
 
-## Detailed Component Blueprint
+| Decision | Rationale |
+|---|---|
+| Contract-First API & Schema Design | Enables 4 developers to build Frontend, Backend, AI, and Fleet modules independently without blocking dependencies |
+| Deterministic vs. AI Logic Separation | Geofence math, route cost calculations, and temperature threshold checks are deterministic for reliability, while risk prioritization and reasoning use AI |
+| MongoDB Persistence Layer | Flexible document schema natively handles dynamic IoT sensor streams, complex route waypoints, and disruption polygons |
+| IBM Bob Integration | Provides a conversational decision-support assistant that answers complex operational queries in natural language |
 
-### 1. Data Ingestion
-Ingests operational data streams including active shipment itineraries, fleet location vectors, environmental weather warnings, port congestion indicators, and IoT cold-chain sensor streams.
+## IBM Technologies Used
 
-### 2. Disruption Analysis
-Evaluates incoming disruption signals (storms, labor strikes, geopolitical blockades) and calculates their geographical impact radius, projected duration, and severity index.
-
-### 3. Shipment Impact Analysis
-Correlates active shipment locations and planned transit paths against active disruption zones to flag compromised, delayed, or high-risk cargo in real time.
-
-### 4. Route / Carrier Recommendation
-Calculates optimal bypass routes and evaluates alternative carrier options to divert affected shipments away from congested corridors while minimizing delay and cost overhead.
-
-### 5. Fleet Utilization Analysis
-Scans regional fleet asset registries to pinpoint idle or under-utilized trucks, refrigerated containers, and vessels that can be dynamically redeployed to high-demand transit nodes.
-
-### 6. Cold-Chain Monitoring
-Continuously tracks thermal sensor logs associated with refrigerated shipments, identifying temperature excursions outside acceptable safety thresholds (e.g., thermal spikes or prolonged drops).
-
-### 7. AI Recommendations Engine
-Synthesizes disruption data, fleet availability, and thermal risks to produce ranked, actionable operational recommendations for supply chain managers.
-
-### 8. IBM Bob Conversational Decision Support
-Acts as an interactive decision-support co-pilot, allowing logistics managers to query supply chain status, explore rerouting scenarios, receive natural-language risk summaries, and execute prioritized actions efficiently.
+- **IBM Bob AI:** Provides conversational decision support, risk analysis rationale generation, and natural-language recommendation synthesis for logistics operators.
