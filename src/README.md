@@ -1,21 +1,36 @@
 # Source Code Directory (`src/`)
 
-This directory will host the source code for the **SupplyGuard AI** application.
+Place all your project's source code in this folder.
 
----
+## SupplyGuard AI Module Structure
 
-## Directory Structure
+Organized into 4 independent modules for 4 parallel developers:
 
-- **[`frontend/`](./frontend/)**:
-  - Will contain the React frontend application built with Vite.
-  - Will host UI/dashboard components, disruption maps, fleet status widgets, and the IBM Bob decision support interface.
-  - Will consume backend REST APIs for real-time shipment, disruption, and cold-chain analytics.
+```
+src/
+  frontend/       ← Module A (Member 1): React/Vite UI & Dashboard
+  backend/        ← Modules B & D (Members 2 & 4): Node.js/Express API server & controllers
+  ai/             ← Module C (Member 3): AI recommendation engine & IBM Bob services
+```
 
-- **[`backend/`](./backend/)**:
-  - Will contain the Node.js / Express backend service layer.
-  - Will expose API endpoints for shipment tracking, disruption analysis, fleet optimization, and cold-chain logs.
-  - Will connect to the MongoDB database and interface with Python-based AI processing engines and IBM Bob services.
+## Structure Guidelines
 
----
+Organize your code logically:
 
-> **Note:** Application feature implementation will commence in Phase 2 following final alignment on shared API contracts and data models.
+- **Frontend (`src/frontend/`):** UI components, pages, hooks, map widgets, and API clients.
+- **Backend (`src/backend/`):** API controllers, services, Mongoose models, routes, and middleware.
+- **AI (`src/ai/`):** AI recommendation analyzers, prompt templates, and IBM Bob conversational adapters.
+
+## Important Files to Include
+
+- `requirements.txt` or `package.json` — dependency manifest
+- `.env.example` — template for environment variables (NEVER commit `.env`)
+- Any database migration files
+- Configuration files
+
+## What NOT to Include in `src/`
+
+- `.env` files with real secrets
+- Large binary files (use Git LFS or link externally)
+- `node_modules/` or `venv/` (these are in `.gitignore`)
+- Build artifacts (`dist/`, `build/`, `__pycache__/`)

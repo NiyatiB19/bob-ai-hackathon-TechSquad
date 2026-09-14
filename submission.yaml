@@ -1,11 +1,21 @@
+# =============================================================================
+# HACKATHON SUBMISSION METADATA
+# =============================================================================
+# Instructions:
+#   - Fill in ALL required fields (marked with # REQUIRED)
+#   - Optional fields can be left as empty strings ""
+#   - Do NOT rename this file — the evaluation pipeline reads it by name
+#   - Use double quotes around all string values
+# =============================================================================
+
 team:
-  name: "[TEAM NAME - TO BE FILLED]"
-  track: "AI"
+  name: "[TEAM NAME - TO BE FILLED]"                             # REQUIRED — e.g., "Orion Squad"
+  track: "AI"                            # REQUIRED — one of: AI | DevOps | Sustainability | Open
   lead:
-    name: "[TEAM LEAD NAME - TO BE FILLED]"
-    email: "[TEAM LEAD EMAIL - TO BE FILLED]"
+    name: "[TEAM LEAD NAME - TO BE FILLED]"                           # REQUIRED — e.g., "Alice Chen"
+    email: "[TEAM LEAD EMAIL - TO BE FILLED]"                          # REQUIRED — e.g., "alice.chen@ibm.com"
   members:
-    - name: "[MEMBER 1 NAME - TO BE FILLED]"
+    - name: "[MEMBER 1 NAME - TO BE FILLED]"                         # REQUIRED — Team member 1
       email: "[MEMBER 1 EMAIL - TO BE FILLED]"
     - name: "[MEMBER 2 NAME - TO BE FILLED]"
       email: "[MEMBER 2 EMAIL - TO BE FILLED]"
@@ -13,14 +23,53 @@ team:
       email: "[MEMBER 3 EMAIL - TO BE FILLED]"
 
 submission:
-  title: "SupplyGuard AI"
-  problem_statement: >
+  title: "SupplyGuard AI"                            # REQUIRED — Project display name, e.g., "SmartOps Dashboard"
+
+  problem_statement: >                 # REQUIRED — 1-3 sentences. What problem? Who has it?
     Supply chain disruptions caused by weather events, port strikes, and geopolitical crises can affect active shipments, overload alternative routes, leave fleet assets idle, and create risks for temperature-sensitive cargo. Supply chain operators need timely intelligence to identify affected shipments, optimize fleet utilization, recommend alternatives, and detect cold-chain temperature excursions before delivery.
-  solution_summary: >
+
+  solution_summary: >                  # REQUIRED — 1-3 sentences. What did you build?
     SupplyGuard AI is an AI-powered supply-chain decision support platform designed to identify disruption-affected shipments, recommend alternative routes or carriers, identify idle fleet assets for redeployment, and monitor cold-chain sensor data for temperature excursions. IBM Bob will provide a conversational AI interface for analyzing supply-chain conditions and generating prioritized operational recommendations.
-  key_features:
+
+  key_features:                        # REQUIRED — List 3 to 5 specific features you implemented
     - "Disruption-affected shipment identification"
     - "Alternative route and carrier recommendations"
     - "Idle fleet detection and redeployment recommendations"
     - "Cold-chain temperature excursion detection and severity classification"
     - "IBM Bob-powered supply-chain decision support"
+
+  tech_stack:
+    languages:
+      - "JavaScript"
+      - "Python"
+    frameworks:
+      - "React"
+      - "Node.js"
+      - "Express.js"
+      - "Vite"
+    ibm_technologies:
+      - "IBM Bob"
+    databases:
+      - "MongoDB"
+    other:
+      - "HTML5"
+      - "CSS3"
+
+  what_we_are_most_proud_of: >         # Optional but recommended — guides judges to your best work
+    Comprehensive technical blueprint, 4-member modular architecture, contract-first design, and IBM Bob decision support framework.
+
+  known_limitations: >                 # Optional but recommended — be honest about gaps
+    Phase 1, 2, and 3 foundation and architecture completed; full business logic implementation ready for Phase 4 development.
+
+# =============================================================================
+# ARTIFACT LOCATIONS
+# These paths are relative to the repo root. Only change if you moved files.
+# =============================================================================
+artifacts:
+  source_code: "src/"
+  setup_guide: "docs/setup-guide.md"
+  architecture_doc: "docs/architecture.md"
+  demo_video: "demo/demo-video-link.txt"   # URL to hosted video (YouTube, Loom, Box)
+  live_demo: "demo/live-demo-url.txt"      # URL to deployed demo (optional)
+  screenshots: "demo/screenshots/"
+  presentation: "presentation/"
