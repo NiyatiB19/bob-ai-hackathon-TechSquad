@@ -7,6 +7,8 @@ const { assessRisk } = require('./services/riskAssessmentService');
 const { recommendRoute } = require('./services/routeRecommendationService');
 const { recommendCarrier } = require('./services/carrierRecommendationService');
 const { getAffectedShipments } = require('./services/affectedShipmentService');
+const aiRoutes = require('./routes/aiRoutes');
+const bobRoutes = require('./routes/bobRoutes');
 
 dotenv.config();
 
@@ -188,6 +190,9 @@ app.post('/api/carriers/recommend', (req, res) => {
     return res.status(error.statusCode || 400).json(errorResponse(error.code || DEFAULT_BAD_REQUEST, error.message || 'Unable to generate carrier recommendation.'));
   }
 });
+
+app.use('/api/ai', aiRoutes);
+app.use('/api/bob', bobRoutes);
 
 app.use((req, res) => {
   res.status(404).json(errorResponse('NOT_FOUND', 'The requested endpoint was not found.', 404));

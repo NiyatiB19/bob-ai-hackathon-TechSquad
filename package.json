@@ -1,12 +1,13 @@
 {
-  "name": "supplyguard-ai-module-b",
+  "name": "supplyguard-ai",
   "version": "1.0.0",
-  "description": "Module B backend for SupplyGuard AI Shipment + Disruption + Route functionality",
+  "description": "SupplyGuard AI — Shipment, Disruption, Route & AI IBM Bob Backend",
   "main": "src/backend/server.js",
   "scripts": {
     "start": "node src/backend/server.js",
     "dev": "nodemon src/backend/server.js",
     "test": "jest --runInBand",
+    "test:ai": "node tests/ai.test.js",
     "lint": "echo \"No lint configured for this backend scaffold.\""
   },
   "keywords": [
@@ -14,9 +15,11 @@
     "shipment",
     "disruption",
     "route",
+    "ai",
+    "bob",
     "hackathon"
   ],
-  "author": "Member 2",
+  "author": "SupplyGuard Team",
   "license": "MIT",
   "dependencies": {
     "cors": "^2.8.5",

@@ -13,7 +13,7 @@ if (!process.env.PORT) {
 
 function startServer(port, candidateIndex = 0) {
   const server = app.listen(port, () => {
-    console.log(`SupplyGuard Module B backend running on port ${port}`);
+    console.log(`SupplyGuard AI backend running on port ${port}`);
   });
 
   server.on('error', (error) => {
