@@ -1,0 +1,15 @@
+{
+  "name": "supplyguard-ai",
+  "version": "1.0.0",
+  "description": "SupplyGuard AI — Disruption Assistant & Fleet Optimizer",
+  "type": "module",
+  "main": "src/backend/server.js",
+  "scripts": {
+    "start": "node src/backend/server.js",
+    "test": "node tests/ai.test.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
+  }
+}
