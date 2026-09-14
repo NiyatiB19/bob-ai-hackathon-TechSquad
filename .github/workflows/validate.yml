@@ -1,0 +1,40 @@
+name: Validate Hackathon Submission
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-structure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Verify submission.yaml existence
+        run: |
+          if [ ! -f "submission.yaml" ]; then
+            echo "ERROR: submission.yaml file is missing!"
+            exit 1
+          fi
+          echo "submission.yaml verified."
+
+      - name: Verify README.md existence
+        run: |
+          if [ ! -f "README.md" ]; then
+            echo "ERROR: README.md file is missing!"
+            exit 1
+          fi
+          echo "README.md verified."
+
+      - name: Verify required directories
+        run: |
+          for dir in src docs demo presentation; do
+            if [ ! -d "$dir" ]; then
+              echo "ERROR: Required directory $dir is missing!"
+              exit 1
+            fi
+          done
+          echo "Directory structure verified."

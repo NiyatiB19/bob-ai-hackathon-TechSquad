@@ -1,0 +1,26 @@
+team:
+  name: "[TEAM NAME - TO BE FILLED]"
+  track: "AI"
+  lead:
+    name: "[TEAM LEAD NAME - TO BE FILLED]"
+    email: "[TEAM LEAD EMAIL - TO BE FILLED]"
+  members:
+    - name: "[MEMBER 1 NAME - TO BE FILLED]"
+      email: "[MEMBER 1 EMAIL - TO BE FILLED]"
+    - name: "[MEMBER 2 NAME - TO BE FILLED]"
+      email: "[MEMBER 2 EMAIL - TO BE FILLED]"
+    - name: "[MEMBER 3 NAME - TO BE FILLED]"
+      email: "[MEMBER 3 EMAIL - TO BE FILLED]"
+
+submission:
+  title: "SupplyGuard AI"
+  problem_statement: >
+    Supply chain disruptions caused by weather events, port strikes, and geopolitical crises can affect active shipments, overload alternative routes, leave fleet assets idle, and create risks for temperature-sensitive cargo. Supply chain operators need timely intelligence to identify affected shipments, optimize fleet utilization, recommend alternatives, and detect cold-chain temperature excursions before delivery.
+  solution_summary: >
+    SupplyGuard AI is an AI-powered supply-chain decision support platform designed to identify disruption-affected shipments, recommend alternative routes or carriers, identify idle fleet assets for redeployment, and monitor cold-chain sensor data for temperature excursions. IBM Bob will provide a conversational AI interface for analyzing supply-chain conditions and generating prioritized operational recommendations.
+  key_features:
+    - "Disruption-affected shipment identification"
+    - "Alternative route and carrier recommendations"
+    - "Idle fleet detection and redeployment recommendations"
+    - "Cold-chain temperature excursion detection and severity classification"
+    - "IBM Bob-powered supply-chain decision support"
