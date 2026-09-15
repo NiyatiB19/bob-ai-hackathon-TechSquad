@@ -1,5 +1,6 @@
 const app = require('./app');
 const dotenv = require('dotenv');
+const { connectDatabase } = require('./config/db');
 
 dotenv.config();
 
@@ -11,7 +12,14 @@ if (!process.env.PORT) {
   PORT_CANDIDATES.push(5001, 5002, 5003, 5004);
 }
 
-function startServer(port, candidateIndex = 0) {
+async function startServer(port, candidateIndex = 0) {
+  try {
+    await connectDatabase();
+    console.log('[Server Startup] Connected to MongoDB database successfully.');
+  } catch (err) {
+    console.warn(`[Server Startup Warning] MongoDB connection attempt returned: ${err.message}`);
+  }
+
   const server = app.listen(port, () => {
     console.log(`SupplyGuard AI backend running on port ${port}`);
   });
