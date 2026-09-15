@@ -11,5 +11,6 @@ const { handleBobQuery } = require('../controllers/bobController');
 const router = Router();
 
 router.post('/query', handleBobQuery);
+router.post('/ask', handleBobQuery);
 
 module.exports = router;

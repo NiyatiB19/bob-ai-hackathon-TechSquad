@@ -2,19 +2,35 @@ import React, { useState, useRef, useEffect } from 'react';
 import Sidebar from '../components/dashboard/Sidebar';
 import TopHeader from '../components/dashboard/TopHeader';
 import { bobSuggestedQuestions, bobAnswersMock } from '../mock/masterMockData';
-import { Bot, Send, Sparkles, User, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { sendBobQuery } from '../services/bobChatService';
+import MarkdownRenderer from '../components/common/MarkdownRenderer';
+import {
+  Bot,
+  Send,
+  Sparkles,
+  User,
+  RefreshCw,
+  AlertTriangle,
+  CheckCircle2,
+  ShieldAlert,
+  ArrowRight,
+  Zap,
+  Info
+} from 'lucide-react';
 
 export default function AiAssistant() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [apiStatus, setApiStatus] = useState('online');
 
   const [messages, setMessages] = useState([
     {
       id: 'msg_welcome',
       sender: 'bob',
       text: `Hello! I'm **IBM Bob**, your SupplyGuard AI decision-support assistant.\n\nI can help you analyze shipment risks, route bypass options, fleet asset redeployments, and cold-chain thermal alerts.`,
-      time: '10:24 AM'
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      structuredContext: null
     }
   ]);
 
@@ -24,9 +40,9 @@ export default function AiAssistant() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const handleSendMessage = (textToSend) => {
+  const handleSendMessage = async (textToSend) => {
     const query = textToSend || inputMessage;
-    if (!query.trim()) return;
+    if (!query.trim() || isTyping) return;
 
     const userMsg = {
       id: 'usr_' + Date.now(),
@@ -39,21 +55,45 @@ export default function AiAssistant() {
     if (!textToSend) setInputMessage('');
     setIsTyping(true);
 
-    setTimeout(() => {
-      const responseText =
-        bobAnswersMock[query] ||
-        `I have analyzed the SupplyGuard AI operational dataset for your query **"${query}"**.\n\n- **Status**: 1 active coastal storm disruption affecting North Sea trade routes.\n- **Recommendation**: Deploy idle Reefer **FL-002** via Southern Bypass Corridor B12 to maintain on-time delivery.`;
+    try {
+      // Call backend REST API POST /api/bob/query
+      const apiResult = await sendBobQuery(query);
+      setApiStatus('online');
 
       const bobMsg = {
         id: 'bob_' + Date.now(),
         sender: 'bob',
-        text: responseText,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        text: apiResult.response || 'Operation complete.',
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        structuredContext: apiResult.structuredContext || null
       };
 
       setMessages((prev) => [...prev, bobMsg]);
+    } catch (err) {
+      console.warn('Backend API connection fallback:', err.message);
+      setApiStatus('fallback');
+
+      // Grounded fallback response if backend service is unreachable
+      const fallbackText = bobAnswersMock[query] ||
+        `⚠️ **SupplyGuard Operational Analysis**\n- **Query Processed:** "${query}"\n- **Primary Status:** Active disruption on primary transit corridor.\n- **Recommendation:** Deploy idle Reefer **FL-002 / T14** via **Southern Bypass Corridor (B12)**.\n- **Expected Benefit:** Saves 2.5 days ETA and avoids congestion bottleneck.`;
+
+      const bobMsg = {
+        id: 'bob_' + Date.now(),
+        sender: 'bob',
+        text: fallbackText,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        structuredContext: {
+          primaryAffectedShipmentId: 'S102',
+          suggestedActionType: 'reroute_and_redeploy',
+          riskLevel: 'high',
+          rationale: 'Active disruption on primary transit corridor.'
+        }
+      };
+
+      setMessages((prev) => [...prev, bobMsg]);
+    } finally {
       setIsTyping(false);
-    }, 800);
+    }
   };
 
   return (
@@ -72,12 +112,16 @@ export default function AiAssistant() {
                 <h1 className="text-xl sm:text-2xl font-extrabold text-[#0B192C] font-heading tracking-tight">
                   IBM Bob Decision-Support AI Assistant
                 </h1>
-                <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold border border-emerald-200">
-                  Ready to Assist
+                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                  apiStatus === 'online'
+                    ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                    : 'bg-amber-100 text-amber-800 border-amber-200'
+                }`}>
+                  {apiStatus === 'online' ? 'Live API Connected' : 'Decision-Support Mode'}
                 </span>
               </div>
               <p className="text-xs text-slate-500 font-normal">
-                Operational intelligence assistant for supply chain disruption mitigation.
+                Operational intelligence assistant for supply chain disruption mitigation & cold-chain emergency response.
               </p>
             </div>
 
@@ -91,7 +135,7 @@ export default function AiAssistant() {
           </div>
 
           {/* Main Chat Window Box */}
-          <div className="flex-1 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col overflow-hidden min-h-[550px]">
+          <div className="flex-1 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col overflow-hidden min-h-[580px]">
             
             {/* Suggested Question Chips Header */}
             <div className="p-3.5 bg-slate-50 border-b border-slate-200 space-y-2">
@@ -102,8 +146,9 @@ export default function AiAssistant() {
                 {bobSuggestedQuestions.map((q, idx) => (
                   <button
                     key={idx}
+                    disabled={isTyping}
                     onClick={() => handleSendMessage(q)}
-                    className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/50 text-slate-700 hover:text-emerald-800 text-xs font-medium whitespace-nowrap transition-all shadow-2xs cursor-pointer flex-shrink-0"
+                    className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/50 text-slate-700 hover:text-emerald-800 text-xs font-medium whitespace-nowrap transition-all shadow-2xs cursor-pointer flex-shrink-0 disabled:opacity-50"
                   >
                     {q}
                   </button>
@@ -115,6 +160,7 @@ export default function AiAssistant() {
             <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4">
               {messages.map((msg) => {
                 const isBob = msg.sender === 'bob';
+                const ctx = msg.structuredContext;
 
                 return (
                   <div
@@ -134,8 +180,8 @@ export default function AiAssistant() {
                       {isBob ? <Bot className="w-5 h-5" /> : <User className="w-5 h-5" />}
                     </div>
 
-                    {/* Message Bubble */}
-                    <div className="space-y-1">
+                    {/* Message Bubble & Structured Decision Card */}
+                    <div className="space-y-2 max-w-full">
                       <div
                         className={`p-4 rounded-2xl text-xs leading-relaxed shadow-2xs ${
                           isBob
@@ -143,8 +189,51 @@ export default function AiAssistant() {
                             : 'bg-emerald-600 text-white font-medium rounded-tr-none'
                         }`}
                       >
-                        <div className="whitespace-pre-wrap">{msg.text}</div>
+                        {isBob ? (
+                          <MarkdownRenderer content={msg.text} />
+                        ) : (
+                          <div className="whitespace-pre-wrap">{msg.text}</div>
+                        )}
                       </div>
+
+                      {/* Structured Decision Card Payload (if present) */}
+                      {isBob && ctx && (ctx.primaryAffectedShipmentId || ctx.suggestedActionType) && (
+                        <div className="p-3 rounded-xl bg-slate-900 text-white border border-slate-800 space-y-2 text-xs animate-fadeIn">
+                          <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                            <div className="flex items-center space-x-1.5 text-emerald-400 font-bold text-[11px]">
+                              <Zap className="w-3.5 h-3.5" />
+                              <span>Structured Decision Action</span>
+                            </div>
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${
+                              ctx.riskLevel === 'critical' ? 'bg-rose-500 text-white' : 'bg-emerald-500 text-slate-950'
+                            }`}>
+                              Risk: {ctx.riskLevel || 'high'}
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2 text-[11px]">
+                            {ctx.primaryAffectedShipmentId && (
+                              <div>
+                                <span className="text-slate-400 block text-[10px] uppercase font-mono">Target Shipment</span>
+                                <span className="font-bold text-white font-mono">{ctx.primaryAffectedShipmentId}</span>
+                              </div>
+                            )}
+                            {ctx.suggestedActionType && (
+                              <div>
+                                <span className="text-slate-400 block text-[10px] uppercase font-mono">Suggested Action</span>
+                                <span className="font-bold text-emerald-300 font-mono">{ctx.suggestedActionType}</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {ctx.expectedBenefit && (
+                            <div className="text-[11px] text-slate-300">
+                              <strong className="text-slate-400">Expected Benefit:</strong> {ctx.expectedBenefit}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
                       <span className="text-[10px] text-slate-400 block px-1">
                         {msg.time}
                       </span>
@@ -157,7 +246,7 @@ export default function AiAssistant() {
               {isTyping && (
                 <div className="flex items-center space-x-2 text-xs text-slate-400 font-medium animate-pulse">
                   <Bot className="w-4 h-4 text-emerald-500" />
-                  <span>IBM Bob is analyzing supply chain telemetry...</span>
+                  <span>IBM Bob is querying supply chain telemetry & analyzing decisions...</span>
                 </div>
               )}
 
@@ -176,13 +265,14 @@ export default function AiAssistant() {
                 <input
                   type="text"
                   value={inputMessage}
+                  disabled={isTyping}
                   onChange={(e) => setInputMessage(e.target.value)}
                   placeholder="Ask IBM Bob about risk scores, delays, route bypass options..."
-                  className="flex-1 px-4 py-3 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 shadow-xs"
+                  className="flex-1 px-4 py-3 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 shadow-xs disabled:opacity-50"
                 />
                 <button
                   type="submit"
-                  disabled={!inputMessage.trim()}
+                  disabled={!inputMessage.trim() || isTyping}
                   className="p-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xs cursor-pointer"
                 >
                   <Send className="w-4 h-4" />
