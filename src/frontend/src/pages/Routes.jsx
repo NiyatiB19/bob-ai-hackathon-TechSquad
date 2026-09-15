@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Sidebar from '../components/dashboard/Sidebar';
 import TopHeader from '../components/dashboard/TopHeader';
+import RouteMapVisualization from '../components/routes/RouteMapVisualization';
 import { routesMockData } from '../mock/masterMockData';
 import {
   Route as RouteIcon,
@@ -151,45 +152,8 @@ export default function Routes() {
             </div>
           </div>
 
-          {/* SVG Route Visualization */}
-          <div className="rounded-xl bg-white border border-slate-200 p-4 shadow-xs space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Navigation className="w-4 h-4 text-sky-600" />
-                <h3 className="text-sm font-bold text-[#0B192C] font-heading">
-                  Route Path Visualization ({origin} → {destination})
-                </h3>
-              </div>
-              <span className="text-xs text-slate-400 font-medium">Interactive Corridor Path</span>
-            </div>
-
-            <div className="relative w-full h-44 rounded-lg bg-[#D4E9F7] border border-sky-200 overflow-hidden flex items-center justify-center p-4">
-              <svg className="w-full h-full" viewBox="0 0 800 200">
-                {/* Disrupted Primary Route (Red Dashed) */}
-                <path d="M 100 140 Q 350 180 700 120" fill="none" stroke="#EF4444" strokeWidth="2.5" strokeDasharray="6 6" />
-                <circle cx="420" cy="165" r="10" fill="#EF4444" />
-
-                {/* Recommended Bypass Route (Green Solid) */}
-                <path d="M 100 140 Q 400 40 700 120" fill="none" stroke="#10B981" strokeWidth="3" />
-
-                {/* Markers */}
-                <circle cx="100" cy="140" r="8" fill="#10B981" />
-                <circle cx="700" cy="120" r="8" fill="#0284C7" />
-              </svg>
-
-              <div className="absolute top-3 left-4 bg-white/90 backdrop-blur-xs px-2.5 py-1 rounded text-xs font-bold text-slate-800 border border-slate-200">
-                {origin} (Origin)
-              </div>
-
-              <div className="absolute bottom-3 right-4 bg-white/90 backdrop-blur-xs px-2.5 py-1 rounded text-xs font-bold text-slate-800 border border-slate-200">
-                {destination} (Destination)
-              </div>
-
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-rose-100 text-rose-800 text-[10px] font-bold px-2 py-0.5 rounded border border-rose-200">
-                ⚠️ Disruption: Port Congestion Corridor
-              </div>
-            </div>
-          </div>
+          {/* Real Interactive Leaflet Route Path Visualization */}
+          <RouteMapVisualization origin={origin} destination={destination} />
 
           {/* Route Comparison Data Table */}
           <div className="rounded-xl bg-white border border-slate-200 shadow-xs overflow-hidden">
