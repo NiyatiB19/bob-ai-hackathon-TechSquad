@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Sun,
+  Moon,
+  Sunset,
   Calendar,
   Clock,
   Bell,
@@ -18,6 +20,16 @@ import { notificationsMock } from '../../mock/dashboardMock';
 export default function TopHeader({ setMobileOpen }) {
   const navigate = useNavigate();
   const currentUser = authService.getCurrentUser() || { name: 'Priyanshi Patel', email: 'priyanshi@supplyguard.ai' };
+
+  // Dynamic Date & Time State
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNow(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Dropdown States
   const [showNotifications, setShowNotifications] = useState(false);
@@ -54,6 +66,44 @@ export default function TopHeader({ setMobileOpen }) {
     return parts[0][0].toUpperCase();
   };
 
+  // Dynamic Greeting based on time of day
+  const hours = now.getHours();
+  let greetingText = 'Good Morning';
+  let GreetingIcon = Sun;
+  let greetingIconClass = 'bg-amber-100 text-amber-600 border-amber-200';
+
+  if (hours >= 12 && hours < 17) {
+    greetingText = 'Good Afternoon';
+    GreetingIcon = Sun;
+    greetingIconClass = 'bg-orange-100 text-orange-600 border-orange-200';
+  } else if (hours >= 17) {
+    greetingText = 'Good Evening';
+    GreetingIcon = Moon;
+    greetingIconClass = 'bg-indigo-100 text-indigo-600 border-indigo-200';
+  }
+
+  // Format Display Name cleanly
+  const getDisplayName = (name) => {
+    if (!name) return 'User';
+    if (name.toLowerCase().includes('supply chain')) return name;
+    return name.split(' ')[0];
+  };
+
+  // Formatted Date (e.g. Sep 15, 2026)
+  const formattedDate = now.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  });
+
+  // Formatted Time (e.g. 4:19 PM)
+  const formattedTime = now.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true
+  });
+
   return (
     <header className="w-full bg-slate-50/90 backdrop-blur-xs border-b border-slate-200 px-4 sm:px-6 py-2.5 flex items-center justify-between sticky top-0 z-30">
       
@@ -68,12 +118,12 @@ export default function TopHeader({ setMobileOpen }) {
         </button>
 
         <div className="flex items-center space-x-3">
-          <div className="p-1.5 rounded-lg bg-amber-100 text-amber-600 border border-amber-200 hidden sm:flex">
-            <Sun className="w-4 h-4" />
+          <div className={`p-1.5 rounded-lg border hidden sm:flex ${greetingIconClass}`}>
+            <GreetingIcon className="w-4 h-4" />
           </div>
           <div>
             <h2 className="text-lg sm:text-xl font-extrabold text-[#0B192C] font-heading tracking-tight leading-tight">
-              Good Morning, {currentUser.name.split(' ')[0]}
+              {greetingText}, {getDisplayName(currentUser.name)}
             </h2>
             <p className="text-xs text-slate-500 font-normal leading-none mt-0.5">
               Here's what's happening with your supply chain today.
@@ -85,16 +135,16 @@ export default function TopHeader({ setMobileOpen }) {
       {/* Right Controls: Date/Time, Notifications, Profile */}
       <div className="flex items-center space-x-3 sm:space-x-4">
         
-        {/* Date & Time Widget */}
-        <div className="hidden md:flex items-center space-x-3.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs text-slate-600 font-medium">
+        {/* Dynamic Live Date & Time Widget */}
+        <div className="hidden md:flex items-center space-x-3.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs text-slate-600 font-medium shadow-xs">
           <div className="flex items-center space-x-1.5">
             <Calendar className="w-3.5 h-3.5 text-sky-600" />
-            <span>Apr 27, 2025</span>
+            <span className="font-semibold">{formattedDate}</span>
           </div>
           <div className="h-3 w-px bg-slate-200" />
           <div className="flex items-center space-x-1.5">
             <Clock className="w-3.5 h-3.5 text-emerald-600" />
-            <span>10:24 AM</span>
+            <span className="font-mono font-bold text-slate-800">{formattedTime}</span>
           </div>
         </div>
 

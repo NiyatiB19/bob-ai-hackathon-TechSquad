@@ -1,16 +1,29 @@
-/**
- * SupplyGuard AI — Configurable Database Connection Layer
- * Shared Infrastructure
- */
+const mongoose = require('mongoose');
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/supplyguard_db';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/supplyguard_db';
 
-/**
- * Placeholder database connection helper.
- * Will be instantiated using Mongoose / MongoDB client driver during Phase 4 feature development.
- */
-export const connectDatabase = async () => {
-  console.log(`[Database Config] Configured MongoDB URI: ${MONGODB_URI}`);
-  // Database connection logic to be implemented in feature modules
-  return { connected: false, uri: MONGODB_URI };
+let isConnected = false;
+
+const connectDatabase = async () => {
+  if (mongoose.connection.readyState === 1) {
+    isConnected = true;
+    return { connected: true, uri: MONGODB_URI };
+  }
+
+  try {
+    await mongoose.connect(MONGODB_URI, {
+      serverSelectionTimeoutMS: 3000,
+    });
+    isConnected = mongoose.connection.readyState === 1;
+    return { connected: isConnected, uri: MONGODB_URI };
+  } catch (error) {
+    isConnected = false;
+    return { connected: false, error: error.message };
+  }
+};
+
+module.exports = {
+  connectDatabase,
+  MONGODB_URI,
+  getIsConnected: () => mongoose.connection.readyState === 1
 };

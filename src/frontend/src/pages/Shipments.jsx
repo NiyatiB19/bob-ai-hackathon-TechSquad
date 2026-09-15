@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/dashboard/Sidebar';
 import TopHeader from '../components/dashboard/TopHeader';
 import ShipmentsToolbar from '../components/shipments/ShipmentsToolbar';
@@ -9,10 +9,12 @@ import ShipmentDetailDrawer from '../components/shipments/ShipmentDetailDrawer';
 import AddShipmentModal from '../components/shipments/AddShipmentModal';
 import { shipmentsInitialData } from '../mock/shipmentsMock';
 import { Check } from 'lucide-react';
+import { API_BASE_URL } from '../services/apiConfig';
 
 export default function Shipments() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [shipments, setShipments] = useState(shipmentsInitialData);
+  const [shipments, setShipments] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
 
   // Search & Filter State
   const [searchTerm, setSearchTerm] = useState('');
@@ -32,29 +34,62 @@ export default function Shipments() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
 
-  // Filter Logic
-  const filteredShipments = shipments.filter((item) => {
-    // Search match
-    const query = searchTerm.toLowerCase().trim();
-    const matchesSearch =
-      !query ||
-      item.id.toLowerCase().includes(query) ||
-      item.origin.toLowerCase().includes(query) ||
-      item.destination.toLowerCase().includes(query) ||
-      item.carrier.toLowerCase().includes(query);
+  useEffect(() => {
+    async function fetchShipments() {
+      try {
+        const queryParams = new URLSearchParams({
+          page: currentPage.toString(),
+          limit: pageSize.toString()
+        });
 
-    // Status Filter (Dropdown or Tab)
-    const effectiveStatus = activeTab !== 'All' ? activeTab : statusFilter;
-    const matchesStatus = effectiveStatus === 'All' || item.status === effectiveStatus;
+        if (searchTerm) queryParams.set('q', searchTerm);
 
-    // Transport Mode Match
-    const matchesMode = transportFilter === 'All' || item.transportMode === transportFilter;
+        const effectiveStatus = activeTab !== 'All' ? activeTab : statusFilter;
+        if (effectiveStatus !== 'All') queryParams.set('status', effectiveStatus);
+        if (transportFilter !== 'All') queryParams.set('shippingMode', transportFilter);
 
-    // Region Match
-    const matchesRegion = regionFilter === 'All' || item.region === regionFilter;
+        const res = await fetch(`${API_BASE_URL}/shipments?${queryParams.toString()}`);
+        const json = await res.json();
 
-    return matchesSearch && matchesStatus && matchesMode && matchesRegion;
-  });
+        if (json.success && json.data) {
+          const rawItems = json.data.shipments || [];
+          setTotalCount(json.data.totalCount || rawItems.length);
+
+          const mapped = rawItems.map((item) => {
+            let badgeClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+            if (item.status === 'delayed') badgeClass = 'bg-amber-50 text-amber-700 border-amber-200';
+            if (item.status === 'cancelled') badgeClass = 'bg-rose-50 text-rose-700 border-rose-200';
+            if (item.status === 'in-transit') badgeClass = 'bg-sky-50 text-sky-700 border-sky-200';
+
+            const originStr = item.origin?.city ? `${item.origin.city}, ${item.origin.country}` : 'Origin';
+            const destStr = item.destination?.city ? `${item.destination.city}, ${item.destination.country}` : 'Destination';
+
+            return {
+              id: item.shipmentId || item.id,
+              origin: originStr,
+              destination: destStr,
+              carrier: item.carrier || 'DataCo Express',
+              transportMode: item.shippingMode ? (item.shippingMode.includes('Air') ? 'Air' : item.shippingMode.includes('Same') ? 'Truck' : 'Ocean') : 'Ocean',
+              status: item.status ? item.status.toUpperCase() : 'IN-TRANSIT',
+              statusBadge: badgeClass,
+              eta: item.estimatedArrival ? new Date(item.estimatedArrival).toLocaleDateString() : 'N/A',
+              temperature: item.temperatureSensitive ? '2°C - 8°C (Monitored)' : 'Standard Ambient',
+              lastUpdated: item.updatedAt ? new Date(item.updatedAt).toLocaleTimeString() : 'Just now',
+              raw: item
+            };
+          });
+
+          setShipments(mapped);
+        }
+      } catch (err) {
+        console.warn('Using local shipments mock fallback:', err.message);
+        setShipments(shipmentsInitialData);
+        setTotalCount(shipmentsInitialData.length);
+      }
+    }
+
+    fetchShipments();
+  }, [currentPage, pageSize, searchTerm, statusFilter, activeTab, transportFilter]);
 
   const handleResetFilters = () => {
     setSearchTerm('');
@@ -73,19 +108,16 @@ export default function Shipments() {
 
   return (
     <div className="min-h-screen bg-slate-100/70 font-sans overflow-x-hidden">
-      
       {/* Sidebar (240px width) */}
       <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
       {/* Main Content Area */}
       <div className="lg:pl-[240px] flex flex-col min-h-screen">
-        
         {/* Sticky Top Header */}
         <TopHeader setMobileOpen={setMobileOpen} />
 
         {/* Page Content Container */}
         <main className="flex-1 p-4 sm:p-5 lg:p-6 space-y-4 max-w-[1550px] w-full mx-auto animate-fadeIn">
-          
           {/* Page Heading & Toast Notification */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
             <div>
@@ -93,7 +125,7 @@ export default function Shipments() {
                 Shipments Management
               </h1>
               <p className="text-xs text-slate-500 font-normal">
-                Track and manage all shipments across your global supply chain.
+                Real-time tracking of DataCo Supply Chain Dataset shipments in MongoDB.
               </p>
             </div>
 
@@ -106,7 +138,7 @@ export default function Shipments() {
           </div>
 
           {/* 1. Summary Metrics */}
-          <ShipmentsMetrics totalCount={shipments.length} />
+          <ShipmentsMetrics totalCount={totalCount} />
 
           {/* 2. Toolbar (Search & Filters) */}
           <ShipmentsToolbar
@@ -126,28 +158,26 @@ export default function Shipments() {
           <ShipmentsTabs
             activeTab={activeTab}
             setActiveTab={(tab) => { setActiveTab(tab); setCurrentPage(1); }}
-            filteredCount={filteredShipments.length}
+            filteredCount={totalCount}
             pageSize={pageSize}
             setPageSize={(size) => { setPageSize(size); setCurrentPage(1); }}
           />
 
           {/* 4. Main Shipment Data Table */}
           <ShipmentsTable
-            shipments={filteredShipments}
-            onSelectShipment={(shipment) => setSelectedShipment(shipment)}
+            shipments={shipments}
+            onSelectShipment={(shipment) => setSelectedShipment(shipment.raw || shipment)}
             currentPage={currentPage}
             setCurrentPage={setCurrentPage}
             pageSize={pageSize}
-            totalItems={filteredShipments.length}
+            totalItems={totalCount}
           />
-
         </main>
 
         {/* Footer */}
         <footer className="px-6 py-3 text-center text-xs text-slate-400 border-t border-slate-200 bg-white">
-          © {new Date().getFullYear()} SupplyGuard AI. All rights reserved. • Shipments Operations Module
+          © {new Date().getFullYear()} SupplyGuard AI. All rights reserved. • DataCo Supply Chain Dataset
         </footer>
-
       </div>
 
       {/* Right-Side Detail Drawer */}
@@ -162,7 +192,6 @@ export default function Shipments() {
         onClose={() => setIsAddModalOpen(false)}
         onAddShipment={handleAddShipment}
       />
-
     </div>
   );
 }

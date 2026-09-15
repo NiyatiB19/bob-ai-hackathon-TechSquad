@@ -1,14 +1,49 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Package, ArrowRight, Snowflake, ChevronRight } from 'lucide-react';
-import { shipmentOverviewData } from '../../mock/dashboardMock';
+import { shipmentOverviewData as fallbackOverviewData } from '../../mock/dashboardMock';
+import { API_BASE_URL } from '../../services/apiConfig';
 
 export default function ShipmentOverview() {
   const navigate = useNavigate();
+  const [shipments, setShipments] = useState(fallbackOverviewData);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/shipments?limit=5`);
+        const json = await res.json();
+        if (json.success && json.data?.shipments?.length > 0) {
+          const mapped = json.data.shipments.map((s) => {
+            let badgeClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+            if (s.status === 'delayed') badgeClass = 'bg-amber-50 text-amber-700 border-amber-200';
+            if (s.status === 'cancelled') badgeClass = 'bg-rose-50 text-rose-700 border-rose-200';
+            if (s.status === 'in-transit') badgeClass = 'bg-sky-50 text-sky-700 border-sky-200';
+
+            const originCity = s.origin?.city || 'Origin';
+            const destCity = s.destination?.city || 'Destination';
+            const etaDate = s.estimatedArrival ? new Date(s.estimatedArrival).toLocaleDateString() : 'N/A';
+
+            return {
+              id: s.shipmentId,
+              route: `${originCity} → ${destCity}`,
+              status: s.status ? s.status.toUpperCase() : 'IN-TRANSIT',
+              statusBadge: badgeClass,
+              eta: etaDate,
+              temp: s.temperatureSensitive ? '2°C - 8°C (Monitored)' : 'Standard Ambient'
+            };
+          });
+          setShipments(mapped);
+        }
+      } catch (err) {
+        console.warn('Using fallback shipment overview:', err.message);
+      }
+    }
+    loadData();
+  }, []);
 
   return (
     <div className="rounded-xl bg-white border border-slate-200 p-4 space-y-3">
-      
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
@@ -20,7 +55,7 @@ export default function ShipmentOverview() {
               Shipment Overview
             </h3>
             <p className="text-[11px] text-slate-400 font-normal">
-              Latest shipment status across all regions
+              Latest DataCo shipments across global networks
             </p>
           </div>
         </div>
@@ -48,7 +83,7 @@ export default function ShipmentOverview() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
-            {shipmentOverviewData.map((row) => (
+            {shipments.map((row) => (
               <tr
                 key={row.id}
                 onClick={() => navigate('/shipments')}
@@ -82,7 +117,6 @@ export default function ShipmentOverview() {
           </tbody>
         </table>
       </div>
-
     </div>
   );
 }

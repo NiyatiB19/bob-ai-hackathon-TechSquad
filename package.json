@@ -6,8 +6,9 @@
   "scripts": {
     "start": "node src/backend/server.js",
     "dev": "nodemon src/backend/server.js",
-    "test": "jest --runInBand",
+    "test": "jest src/backend/tests --runInBand",
     "test:ai": "node tests/ai.test.js",
+    "import:dataco": "node scripts/importDataCo.js",
     "lint": "echo \"No lint configured for this backend scaffold.\""
   },
   "keywords": [
@@ -23,8 +24,10 @@
   "license": "MIT",
   "dependencies": {
     "cors": "^2.8.5",
+    "csv-parser": "^3.2.1",
     "dotenv": "^16.4.5",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "mongoose": "^9.10.1"
   },
   "devDependencies": {
     "jest": "^29.7.0",
