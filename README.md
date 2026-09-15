@@ -152,7 +152,7 @@ cat docs/setup-guide.md
 
 ## ⚠️ Known Limitations
   
-    The current submission focuses on the Phase 1-3 foundation, architecture,
+The current submission focuses on the Phase 1-3 foundation, architecture,
     core workflows, and AI decision-support framework. Some advanced production
     capabilities, such as live external logistics data integration, real-time
     IoT sensor streaming, and large-scale optimization, would require further
