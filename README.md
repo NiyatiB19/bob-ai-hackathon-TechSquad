@@ -151,13 +151,19 @@ cat docs/setup-guide.md
 ---
 
 ## ⚠️ Known Limitations
-
-- Phase 1 (Foundation), Phase 2 (Technical Architecture), and Phase 3 (Parallel Development Setup) are completed.
-- Full business logic implementation across Modules A, B, C, and D is ready for Phase 4 parallel development.
+  
+    The current submission focuses on the Phase 1-3 foundation, architecture,
+    core workflows, and AI decision-support framework. Some advanced production
+    capabilities, such as live external logistics data integration, real-time
+    IoT sensor streaming, and large-scale optimization, would require further
+    development and deployment infrastructure.
 
 ---
 
 ## 🏅 What We're Most Proud Of
 
-- Comprehensive technical blueprint and contract-first architecture enabling 4 developers to build independently without blocking each other.
-- Meaningful integration design of IBM Bob as an operational decision-support assistant.
+ A modular, contract-first architecture that brings disruption intelligence,
+    fleet utilization, and cold-chain monitoring together in one unified
+    decision-support platform. We are especially proud of integrating IBM Bob
+    as a conversational AI layer that can turn complex supply-chain conditions
+    into prioritized, actionable operational recommendations.
