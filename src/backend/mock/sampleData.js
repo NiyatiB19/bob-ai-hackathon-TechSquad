@@ -2,9 +2,9 @@ const shipments = [
   {
     shipmentId: 'S101',
     trackingNumber: 'TRK-1001',
-    origin: { city: 'Mumbai', country: 'India' },
-    destination: { city: 'Singapore', country: 'Singapore' },
-    currentLocation: { city: 'Mumbai', country: 'India' },
+    origin: { city: 'Mumbai', country: 'India', lat: 19.0760, lng: 72.8777 },
+    destination: { city: 'Singapore', country: 'Singapore', lat: 1.3521, lng: 103.8198 },
+    currentLocation: { city: 'Mumbai', country: 'India', lat: 19.0760, lng: 72.8777 },
     cargoType: 'Electronics',
     priority: 'medium',
     status: 'planned',
@@ -25,9 +25,9 @@ const shipments = [
   {
     shipmentId: 'S102',
     trackingNumber: 'TRK-1002',
-    origin: { city: 'Mumbai', country: 'India' },
-    destination: { city: 'Singapore', country: 'Singapore' },
-    currentLocation: { city: 'Mumbai', country: 'India' },
+    origin: { city: 'Mumbai', country: 'India', lat: 19.0760, lng: 72.8777 },
+    destination: { city: 'Singapore', country: 'Singapore', lat: 1.3521, lng: 103.8198 },
+    currentLocation: { city: 'Mumbai', country: 'India', port: 'Mumbai Port', lat: 19.0760, lng: 72.8777 },
     cargoType: 'Pharmaceuticals',
     priority: 'critical',
     status: 'in-transit',
@@ -43,15 +43,15 @@ const shipments = [
     estimatedArrival: '2026-09-20T18:00:00.000Z',
     carrier: 'OceanFast',
     temperatureSensitive: true,
-    disruptionExposure: 'high',
-    currentLocation: { city: 'Mumbai', country: 'India', port: 'Mumbai Port' }
+    requiredTemperatureRange: { min: 2.0, max: 8.0, unit: 'C' },
+    disruptionExposure: 'high'
   },
   {
     shipmentId: 'S103',
     trackingNumber: 'TRK-1003',
-    origin: { city: 'Dubai', country: 'UAE' },
-    destination: { city: 'London', country: 'UK' },
-    currentLocation: { city: 'Dubai', country: 'UAE' },
+    origin: { city: 'Dubai', country: 'UAE', lat: 25.2048, lng: 55.2708 },
+    destination: { city: 'London', country: 'UK', lat: 51.5074, lng: -0.1278 },
+    currentLocation: { city: 'Dubai', country: 'UAE', lat: 25.2048, lng: 55.2708 },
     cargoType: 'Perishables',
     priority: 'high',
     status: 'delayed',
@@ -67,14 +67,15 @@ const shipments = [
     estimatedArrival: '2026-09-22T09:00:00.000Z',
     carrier: 'TradeBridge',
     temperatureSensitive: true,
+    requiredTemperatureRange: { min: 4.0, max: 10.0, unit: 'C' },
     disruptionExposure: 'medium'
   },
   {
     shipmentId: 'S104',
     trackingNumber: 'TRK-1004',
-    origin: { city: 'Colombo', country: 'Sri Lanka' },
-    destination: { city: 'Singapore', country: 'Singapore' },
-    currentLocation: { city: 'Colombo', country: 'Sri Lanka' },
+    origin: { city: 'Colombo', country: 'Sri Lanka', lat: 6.9271, lng: 79.8612 },
+    destination: { city: 'Singapore', country: 'Singapore', lat: 1.3521, lng: 103.8198 },
+    currentLocation: { city: 'Colombo', country: 'Sri Lanka', lat: 6.9271, lng: 79.8612 },
     cargoType: 'Consumer Goods',
     priority: 'low',
     status: 'planned',
@@ -90,6 +91,54 @@ const shipments = [
     estimatedArrival: '2026-09-25T12:00:00.000Z',
     carrier: 'BlueHarbor',
     temperatureSensitive: false,
+    disruptionExposure: 'low'
+  },
+  {
+    shipmentId: 'S205',
+    trackingNumber: 'TRK-2005',
+    origin: { city: 'Frankfurt', country: 'Germany', lat: 50.1109, lng: 8.6821 },
+    destination: { city: 'Munich', country: 'Germany', lat: 48.1351, lng: 11.5820 },
+    currentLocation: { city: 'Frankfurt', country: 'Germany', lat: 50.1109, lng: 8.6821 },
+    cargoType: 'Vaccines',
+    priority: 'critical',
+    status: 'in-transit',
+    route: {
+      name: 'Frankfurt -> Munich',
+      segments: [{ from: 'Frankfurt', to: 'Munich' }],
+      distanceKm: 390,
+      durationHours: 5,
+      status: 'available',
+      risk: 'CRITICAL'
+    },
+    estimatedDeparture: '2026-09-15T06:00:00.000Z',
+    estimatedArrival: '2026-09-15T12:00:00.000Z',
+    carrier: 'EuroFreight Express',
+    temperatureSensitive: true,
+    requiredTemperatureRange: { min: 2.0, max: 8.0, unit: 'C' },
+    disruptionExposure: 'high'
+  },
+  {
+    shipmentId: 'S206',
+    trackingNumber: 'TRK-2006',
+    origin: { city: 'Rotterdam', country: 'Netherlands', lat: 51.9244, lng: 4.4777 },
+    destination: { city: 'Berlin', country: 'Germany', lat: 52.5200, lng: 13.4050 },
+    currentLocation: { city: 'Rotterdam', country: 'Netherlands', lat: 51.9244, lng: 4.4777 },
+    cargoType: 'Insulin Products',
+    priority: 'high',
+    status: 'in-transit',
+    route: {
+      name: 'Rotterdam -> Berlin',
+      segments: [{ from: 'Rotterdam', to: 'Berlin' }],
+      distanceKm: 690,
+      durationHours: 8,
+      status: 'available',
+      risk: 'LOW'
+    },
+    estimatedDeparture: '2026-09-15T04:00:00.000Z',
+    estimatedArrival: '2026-09-15T13:00:00.000Z',
+    carrier: 'EuroFreight Express',
+    temperatureSensitive: true,
+    requiredTemperatureRange: { min: 2.0, max: 8.0, unit: 'C' },
     disruptionExposure: 'low'
   }
 ];
@@ -205,4 +254,260 @@ const routes = [
   }
 ];
 
-module.exports = { shipments, disruptions, carriers, routes };
+/* Module D (Member 4) — Fleet Assets Seed Scenarios */
+const fleetAssets = [
+  {
+    fleetAssetId: 'T14',
+    assetName: 'Reefer Truck T14 (ColdGuard Heavy)',
+    transportMode: 'truck',
+    capacity: { maxWeightKg: 15000, volumeM3: 45, refrigerated: true },
+    currentLocation: { city: 'Mumbai', country: 'India', lat: 19.0760, lng: 72.8777 },
+    status: 'IDLE',
+    utilizationPercentage: 0,
+    assignedShipmentId: null,
+    driver: 'Rajesh Kumar',
+    lastUpdated: '2026-09-15T10:00:00.000Z'
+  },
+  {
+    fleetAssetId: 'flt_5001',
+    assetName: 'ColdGuard Reefer Semi-Trailer T-408',
+    transportMode: 'truck',
+    capacity: { maxWeightKg: 24000, volumeM3: 85, refrigerated: true },
+    currentLocation: { city: 'Frankfurt', country: 'Germany', lat: 50.1109, lng: 8.6821 },
+    status: 'IDLE',
+    utilizationPercentage: 0,
+    assignedShipmentId: null,
+    driver: 'Standby Crew A',
+    lastUpdated: '2026-09-15T09:30:00.000Z'
+  },
+  {
+    fleetAssetId: 'flt_5002',
+    assetName: 'Express Freight Container Vessel V-90',
+    transportMode: 'vessel',
+    capacity: { maxWeightKg: 450000, volumeM3: 1200, refrigerated: false },
+    currentLocation: { city: 'Mumbai', country: 'India', lat: 19.0760, lng: 72.8777 },
+    status: 'IN_TRANSIT',
+    utilizationPercentage: 88,
+    assignedShipmentId: 'S101',
+    driver: 'Captain V. Sharma',
+    lastUpdated: '2026-09-15T08:00:00.000Z'
+  },
+  {
+    fleetAssetId: 'flt_5003',
+    assetName: 'Air Cargo Pallet Container A-102',
+    transportMode: 'container',
+    capacity: { maxWeightKg: 10000, volumeM3: 30, refrigerated: true },
+    currentLocation: { city: 'Dubai', country: 'UAE', lat: 25.2048, lng: 55.2708 },
+    status: 'ASSIGNED',
+    utilizationPercentage: 75,
+    assignedShipmentId: 'S103',
+    driver: 'Logistics Crew B',
+    lastUpdated: '2026-09-15T07:15:00.000Z'
+  },
+  {
+    fleetAssetId: 'flt_5004',
+    assetName: 'Heavy Duty Carrier 04',
+    transportMode: 'truck',
+    capacity: { maxWeightKg: 18000, volumeM3: 50, refrigerated: false },
+    currentLocation: { city: 'Delhi', country: 'India', lat: 28.6139, lng: 77.2090 },
+    status: 'MAINTENANCE',
+    utilizationPercentage: 0,
+    assignedShipmentId: null,
+    driver: 'Depot Repair Shop',
+    lastUpdated: '2026-09-15T06:00:00.000Z'
+  }
+];
+
+/* Module D (Member 4) — Cold-Chain IoT Sensors & Readings Seed Scenarios */
+const coldChainSensors = [
+  {
+    sensorId: 'sns_6001',
+    shipmentId: 'S102',
+    deviceModel: 'ThermoSense Pro IoT-X',
+    batteryStatus: 94,
+    targetTempMin: 2.0,
+    targetTempMax: 8.0,
+    isActive: true,
+    createdAt: '2026-09-12T12:00:00.000Z'
+  },
+  {
+    sensorId: 'sns_6002',
+    shipmentId: 'S205',
+    deviceModel: 'ThermoGuard Ultra IoT',
+    batteryStatus: 88,
+    targetTempMin: 2.0,
+    targetTempMax: 8.0,
+    isActive: true,
+    createdAt: '2026-09-15T06:00:00.000Z'
+  },
+  {
+    sensorId: 'sns_6003',
+    shipmentId: 'S206',
+    deviceModel: 'ThermoSense Standard',
+    batteryStatus: 98,
+    targetTempMin: 2.0,
+    targetTempMax: 8.0,
+    isActive: true,
+    createdAt: '2026-09-15T04:00:00.000Z'
+  },
+  {
+    sensorId: 'sns_6004',
+    shipmentId: 'S103',
+    deviceModel: 'FruitFresh Monitor IoT',
+    batteryStatus: 91,
+    targetTempMin: 4.0,
+    targetTempMax: 10.0,
+    isActive: true,
+    createdAt: '2026-09-13T09:00:00.000Z'
+  }
+];
+
+const temperatureReadings = [
+  // Normal cold-chain reading (S206)
+  {
+    readingId: 'rdg_7001',
+    sensorId: 'sns_6003',
+    shipmentId: 'S206',
+    timestamp: '2026-09-15T11:00:00.000Z',
+    temperatureCelsius: 4.5,
+    allowedMinTemp: 2.0,
+    allowedMaxTemp: 8.0,
+    isExcursion: false,
+    severity: 'NORMAL'
+  },
+  // Warning temperature excursion (S103: 10.8°C vs 10.0°C max allowed)
+  {
+    readingId: 'rdg_7002',
+    sensorId: 'sns_6004',
+    shipmentId: 'S103',
+    timestamp: '2026-09-15T11:30:00.000Z',
+    temperatureCelsius: 10.8,
+    allowedMinTemp: 4.0,
+    allowedMaxTemp: 10.0,
+    isExcursion: true,
+    severity: 'WARNING'
+  },
+  // Critical temperature excursion timeline for S205 (Vaccines: 2-8°C allowed)
+  {
+    readingId: 'rdg_7003_1',
+    sensorId: 'sns_6002',
+    shipmentId: 'S205',
+    timestamp: '2026-09-15T10:00:00.000Z',
+    temperatureCelsius: 4.0,
+    allowedMinTemp: 2.0,
+    allowedMaxTemp: 8.0,
+    isExcursion: false,
+    severity: 'NORMAL'
+  },
+  {
+    readingId: 'rdg_7003_2',
+    sensorId: 'sns_6002',
+    shipmentId: 'S205',
+    timestamp: '2026-09-15T10:30:00.000Z',
+    temperatureCelsius: 5.0,
+    allowedMinTemp: 2.0,
+    allowedMaxTemp: 8.0,
+    isExcursion: false,
+    severity: 'NORMAL'
+  },
+  {
+    readingId: 'rdg_7003_3',
+    sensorId: 'sns_6002',
+    shipmentId: 'S205',
+    timestamp: '2026-09-15T11:00:00.000Z',
+    temperatureCelsius: 7.0,
+    allowedMinTemp: 2.0,
+    allowedMaxTemp: 8.0,
+    isExcursion: false,
+    severity: 'NORMAL'
+  },
+  {
+    readingId: 'rdg_7003_4',
+    sensorId: 'sns_6002',
+    shipmentId: 'S205',
+    timestamp: '2026-09-15T11:30:00.000Z',
+    temperatureCelsius: 12.0,
+    allowedMinTemp: 2.0,
+    allowedMaxTemp: 8.0,
+    isExcursion: true,
+    severity: 'WARNING'
+  },
+  {
+    readingId: 'rdg_7003_5',
+    sensorId: 'sns_6002',
+    shipmentId: 'S205',
+    timestamp: '2026-09-15T12:00:00.000Z',
+    temperatureCelsius: 15.0,
+    allowedMinTemp: 2.0,
+    allowedMaxTemp: 8.0,
+    isExcursion: true,
+    severity: 'CRITICAL'
+  },
+  {
+    readingId: 'rdg_7003_6',
+    sensorId: 'sns_6002',
+    shipmentId: 'S205',
+    timestamp: '2026-09-15T12:30:00.000Z',
+    temperatureCelsius: 14.0,
+    allowedMinTemp: 2.0,
+    allowedMaxTemp: 8.0,
+    isExcursion: true,
+    severity: 'CRITICAL'
+  },
+  // Temperature returns to safe range (recovery)
+  {
+    readingId: 'rdg_7003_7',
+    sensorId: 'sns_6002',
+    shipmentId: 'S205',
+    timestamp: '2026-09-15T13:00:00.000Z',
+    temperatureCelsius: 7.0,
+    allowedMinTemp: 2.0,
+    allowedMaxTemp: 8.0,
+    isExcursion: false,
+    severity: 'NORMAL'
+  }
+];
+
+const coldChainAlerts = [
+  {
+    alertId: 'alt_8001',
+    shipmentId: 'S205',
+    sensorId: 'sns_6002',
+    readingId: 'rdg_7003_5',
+    temperatureCelsius: 15.0,
+    allowedMinTemp: 2.0,
+    allowedMaxTemp: 8.0,
+    severity: 'CRITICAL',
+    durationMinutes: 90,
+    startTime: '2026-09-15T11:30:00.000Z',
+    status: 'ACTIVE',
+    recommendedAction: 'Inspect shipment S205 immediately and transfer cargo to controlled-temperature storage unit.',
+    createdAt: '2026-09-15T12:00:00.000Z'
+  },
+  {
+    alertId: 'alt_8002',
+    shipmentId: 'S103',
+    sensorId: 'sns_6004',
+    readingId: 'rdg_7002',
+    temperatureCelsius: 10.8,
+    allowedMinTemp: 4.0,
+    allowedMaxTemp: 10.0,
+    severity: 'WARNING',
+    durationMinutes: 30,
+    startTime: '2026-09-15T11:30:00.000Z',
+    status: 'ACTIVE',
+    recommendedAction: 'Monitor container cooling compressor and verify ventilation settings.',
+    createdAt: '2026-09-15T11:30:00.000Z'
+  }
+];
+
+module.exports = {
+  shipments,
+  disruptions,
+  carriers,
+  routes,
+  fleetAssets,
+  coldChainSensors,
+  temperatureReadings,
+  coldChainAlerts
+};

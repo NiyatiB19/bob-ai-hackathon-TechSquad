@@ -31,7 +31,7 @@ export async function analyzeShipment({ shipmentId, shipment, customContext } = 
   const shipments = context.shipments || [];
   const disruptions = context.disruptions || [];
   const routes = context.routes || [];
-  const fleetAssets = context.fleet || [];
+  const fleetAssets = context.fleetAssets || context.fleet || [];
   const coldChainReadings = context.temperatureReadings || [];
 
   // Determine target shipment

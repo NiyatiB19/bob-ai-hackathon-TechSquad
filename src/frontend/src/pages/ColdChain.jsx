@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/dashboard/Sidebar';
 import TopHeader from '../components/dashboard/TopHeader';
 import { coldChainMockData, temperatureHistoryChartData } from '../mock/masterMockData';
+import {
+  fetchColdChainOverview,
+  fetchShipmentTelemetry,
+  acknowledgeAlertApi
+} from '../services/fleetColdChainService';
 import {
   Snowflake,
   AlertTriangle,
@@ -12,7 +17,8 @@ import {
   ShieldAlert,
   ArrowRight,
   TrendingUp,
-  X
+  X,
+  Loader2
 } from 'lucide-react';
 
 export default function ColdChain() {
@@ -20,13 +26,96 @@ export default function ColdChain() {
   const navigate = useNavigate();
 
   const [coldData, setColdData] = useState(coldChainMockData);
-  const [selectedShipment, setSelectedShipment] = useState(coldChainMockData[2]); // Default SG-1008
+  const [overviewMetrics, setOverviewMetrics] = useState(null);
+  const [selectedShipment, setSelectedShipment] = useState(coldChainMockData[2]); // Default SG-1008 / S205
+  const [selectedTelemetry, setSelectedTelemetry] = useState(null);
   const [alertAcknowledged, setAlertAcknowledged] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleAcknowledgeAlert = () => {
+  // Load live cold-chain overview & alerts on mount
+  useEffect(() => {
+    let isMounted = true;
+    async function loadColdChainData() {
+      setIsLoading(true);
+      try {
+        const overview = await fetchColdChainOverview();
+        if (isMounted && overview) {
+          setOverviewMetrics(overview);
+          if (overview.activeAlerts && overview.activeAlerts.length > 0) {
+            setColdData(prev => {
+              // Merge active alert items into UI table
+              const updated = [...prev];
+              overview.activeAlerts.forEach(alt => {
+                const existingIdx = updated.findIndex(u => u.id === alt.shipmentId);
+                const itemData = {
+                  id: alt.shipmentId,
+                  containerNo: `CONT-${alt.sensorId || '12345'}`,
+                  currentTemp: alt.temperatureCelsius,
+                  targetMin: alt.allowedMinTemp,
+                  targetMax: alt.allowedMaxTemp,
+                  status: alt.severity === 'CRITICAL' ? 'Critical Excursion' : 'Warning',
+                  statusBadge: alt.severity === 'CRITICAL'
+                    ? 'bg-rose-100 text-rose-800 border-rose-200 font-bold'
+                    : 'bg-amber-100 text-amber-800 border-amber-200',
+                  lastReading: 'Live IoT Telemetry',
+                  trend: `${alt.severity} (${alt.temperatureCelsius}°C)`,
+                  location: 'Monitored Trade Corridor',
+                  excursionDuration: `${alt.durationMinutes || 45} minutes`,
+                  excursionSeverity: alt.severity
+                };
+                if (existingIdx !== -1) {
+                  updated[existingIdx] = { ...updated[existingIdx], ...itemData };
+                } else {
+                  updated.unshift(itemData);
+                }
+              });
+              return updated;
+            });
+          }
+        }
+      } catch (err) {
+        console.warn('Backend API unavailable, using mock cold-chain data:', err);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    }
+
+    loadColdChainData();
+    return () => { isMounted = false; };
+  }, []);
+
+  // Fetch telemetry for selected shipment
+  useEffect(() => {
+    let isMounted = true;
+    async function loadTelemetry() {
+      if (!selectedShipment?.id) return;
+      try {
+        const telem = await fetchShipmentTelemetry(selectedShipment.id);
+        if (isMounted && telem) {
+          setSelectedTelemetry(telem);
+        }
+      } catch (e) {
+        console.warn('Could not load shipment telemetry details:', e);
+      }
+    }
+
+    loadTelemetry();
+    return () => { isMounted = false; };
+  }, [selectedShipment]);
+
+  const handleAcknowledgeAlert = async () => {
+    try {
+      const activeAlt = overviewMetrics?.activeAlerts?.[0];
+      if (activeAlt) {
+        await acknowledgeAlertApi(activeAlt.alertId);
+      }
+    } catch (e) {
+      console.warn('API alert acknowledgement fallback:', e);
+    }
+
     setAlertAcknowledged(true);
     setColdData(coldData.map(item => {
-      if (item.id === 'SG-1008') {
+      if (item.id === selectedShipment.id || item.id === 'SG-1008' || item.id === 'S205') {
         return {
           ...item,
           status: 'Alert Acknowledged',
@@ -36,6 +125,16 @@ export default function ColdChain() {
       return item;
     }));
   };
+
+  // Metrics
+  const monitoredCargo = overviewMetrics?.monitoredShipments ?? 16;
+  const healthyCount = overviewMetrics?.normalShipments ?? 14;
+  const warningCount = overviewMetrics?.warningShipments ?? 1;
+  const criticalCount = overviewMetrics?.criticalShipments ?? 1;
+  const healthRate = overviewMetrics?.compliancePercentage ? `${overviewMetrics.compliancePercentage}%` : '96%';
+
+  // Dynamic Chart points if available from backend
+  const chartReadings = selectedTelemetry?.readings || [];
 
   return (
     <div className="min-h-screen bg-slate-100/70 font-sans overflow-x-hidden">
@@ -56,7 +155,7 @@ export default function ColdChain() {
             </p>
           </div>
 
-          {/* Critical Alert Banner (if SG-1008 excursion active) */}
+          {/* Critical Alert Banner (if excursion active) */}
           {!alertAcknowledged && (
             <div className="rounded-xl bg-gradient-to-r from-rose-500 via-rose-600 to-pink-600 text-white p-4 shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-pulse-glow">
               <div className="flex items-center space-x-3">
@@ -65,10 +164,10 @@ export default function ColdChain() {
                 </div>
                 <div>
                   <h3 className="font-extrabold text-sm font-heading">
-                    Critical Temperature Excursion Detected — Shipment SG-1008
+                    Critical Temperature Excursion Detected — Shipment {selectedShipment.id || 'SG-1008 / S205'}
                   </h3>
                   <p className="text-xs text-rose-100 font-medium">
-                    Container #CONT-12345 reading <strong>14.2°C</strong> (Allowed Range: 2.0°C – 8.0°C). Duration: 45 mins.
+                    Container #{selectedShipment.containerNo || 'CONT-12345'} reading <strong>{selectedShipment.currentTemp || 14.2}°C</strong> (Allowed Range: {selectedShipment.targetMin || 2.0}°C – {selectedShipment.targetMax || 8.0}°C). Duration: {selectedShipment.excursionDuration || '45 mins'}.
                   </p>
                 </div>
               </div>
@@ -94,32 +193,32 @@ export default function ColdChain() {
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-3.5">
             <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs">
               <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">Monitored Cargo</span>
-              <div className="text-2xl font-extrabold text-[#0B192C] font-heading">16</div>
+              <div className="text-2xl font-extrabold text-[#0B192C] font-heading">{monitoredCargo}</div>
               <span className="text-[11px] text-slate-500 font-medium">Active IoT Sensors</span>
             </div>
 
             <div className="rounded-xl border border-emerald-200 bg-white p-3.5 shadow-xs">
               <span className="text-[10px] font-extrabold text-emerald-600 uppercase tracking-wider block">Healthy Range</span>
-              <div className="text-2xl font-extrabold text-[#0B192C] font-heading">14</div>
+              <div className="text-2xl font-extrabold text-[#0B192C] font-heading">{healthyCount}</div>
               <span className="text-[11px] text-emerald-600 font-medium">2°C – 8°C Compliant</span>
             </div>
 
             <div className="rounded-xl border border-amber-200 bg-white p-3.5 shadow-xs">
               <span className="text-[10px] font-extrabold text-amber-700 uppercase tracking-wider block">Warning Level</span>
-              <div className="text-2xl font-extrabold text-[#0B192C] font-heading">1</div>
-              <span className="text-[11px] text-amber-700 font-medium">10.8°C Rising</span>
+              <div className="text-2xl font-extrabold text-[#0B192C] font-heading">{warningCount}</div>
+              <span className="text-[11px] text-amber-700 font-medium">Excursion Warning</span>
             </div>
 
             <div className="rounded-xl border border-rose-200 bg-rose-50/40 p-3.5 shadow-xs">
               <span className="text-[10px] font-extrabold text-rose-500 uppercase tracking-wider block">Critical Excursions</span>
-              <div className="text-2xl font-extrabold text-rose-700 font-heading">1</div>
-              <span className="text-[11px] text-rose-600 font-semibold">14.2°C Exceeded</span>
+              <div className="text-2xl font-extrabold text-rose-700 font-heading">{criticalCount}</div>
+              <span className="text-[11px] text-rose-600 font-semibold">Exceeded Threshold</span>
             </div>
 
             <div className="rounded-xl border border-sky-200 bg-white p-3.5 shadow-xs col-span-2 lg:col-span-1">
               <span className="text-[10px] font-extrabold text-sky-600 uppercase tracking-wider block">Overall Health</span>
-              <div className="text-2xl font-extrabold text-[#0B192C] font-heading">96%</div>
-              <span className="text-[11px] text-emerald-600 font-medium">0 Loss Incidents</span>
+              <div className="text-2xl font-extrabold text-[#0B192C] font-heading">{healthRate}</div>
+              <span className="text-[11px] text-emerald-600 font-medium">Compliance Score</span>
             </div>
           </div>
 
@@ -138,54 +237,61 @@ export default function ColdChain() {
                 <span className="text-[11px] font-semibold text-slate-400">Live 30s Telemetry Poll</span>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200">
-                      <th className="py-2.5 px-3">Shipment</th>
-                      <th className="py-2.5 px-3">Current Temp</th>
-                      <th className="py-2.5 px-3">Required Range</th>
-                      <th className="py-2.5 px-3">Status</th>
-                      <th className="py-2.5 px-3">Last Reading</th>
-                      <th className="py-2.5 px-3">Trend</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 font-medium">
-                    {coldData.map((row) => {
-                      const isSelected = selectedShipment.id === row.id;
+              {isLoading ? (
+                <div className="p-8 text-center text-slate-500 flex items-center justify-center space-x-2">
+                  <Loader2 className="w-5 h-5 animate-spin text-sky-600" />
+                  <span className="text-xs font-medium">Loading cold-chain telemetry logs...</span>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200">
+                        <th className="py-2.5 px-3">Shipment</th>
+                        <th className="py-2.5 px-3">Current Temp</th>
+                        <th className="py-2.5 px-3">Required Range</th>
+                        <th className="py-2.5 px-3">Status</th>
+                        <th className="py-2.5 px-3">Last Reading</th>
+                        <th className="py-2.5 px-3">Trend</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 font-medium">
+                      {coldData.map((row) => {
+                        const isSelected = selectedShipment.id === row.id;
 
-                      return (
-                        <tr
-                          key={row.id}
-                          onClick={() => setSelectedShipment(row)}
-                          className={`cursor-pointer transition-colors ${
-                            isSelected ? 'bg-sky-50/80 font-bold' : 'hover:bg-slate-50/80'
-                          }`}
-                        >
-                          <td className="py-3 px-3 font-mono font-bold text-slate-900">
-                            {row.id}
-                            <span className="block text-[10px] text-slate-400 font-normal">{row.containerNo}</span>
-                          </td>
-                          <td className="py-3 px-3 font-extrabold text-sm text-slate-900">
-                            <div className="inline-flex items-center space-x-1">
-                              <Snowflake className="w-3.5 h-3.5 text-sky-500" />
-                              <span>{row.currentTemp}°C</span>
-                            </div>
-                          </td>
-                          <td className="py-3 px-3 text-slate-600">{row.targetMin}°C – {row.targetMax}°C</td>
-                          <td className="py-3 px-3">
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${row.statusBadge}`}>
-                              {row.status}
-                            </span>
-                          </td>
-                          <td className="py-3 px-3 text-slate-400 text-[11px]">{row.lastReading}</td>
-                          <td className="py-3 px-3 text-slate-600">{row.trend}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                        return (
+                          <tr
+                            key={row.id}
+                            onClick={() => setSelectedShipment(row)}
+                            className={`cursor-pointer transition-colors ${
+                              isSelected ? 'bg-sky-50/80 font-bold' : 'hover:bg-slate-50/80'
+                            }`}
+                          >
+                            <td className="py-3 px-3 font-mono font-bold text-slate-900">
+                              {row.id}
+                              <span className="block text-[10px] text-slate-400 font-normal">{row.containerNo}</span>
+                            </td>
+                            <td className="py-3 px-3 font-extrabold text-sm text-slate-900">
+                              <div className="inline-flex items-center space-x-1">
+                                <Snowflake className="w-3.5 h-3.5 text-sky-500" />
+                                <span>{row.currentTemp}°C</span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-3 text-slate-600">{row.targetMin}°C – {row.targetMax}°C</td>
+                            <td className="py-3 px-3">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${row.statusBadge}`}>
+                                {row.status}
+                              </span>
+                            </td>
+                            <td className="py-3 px-3 text-slate-400 text-[11px]">{row.lastReading}</td>
+                            <td className="py-3 px-3 text-slate-600">{row.trend}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
 
             {/* Right Column: Selected Shipment Temperature Chart & Detail */}
@@ -206,7 +312,7 @@ export default function ColdChain() {
               <div className="space-y-1">
                 <div className="flex items-center justify-between text-[11px] font-bold text-slate-500">
                   <span>Temperature (°C) Timeline</span>
-                  <span className="text-emerald-600">Safe Range: 2.0°C – 8.0°C</span>
+                  <span className="text-emerald-600">Safe Range: {selectedShipment.targetMin || 2.0}°C – {selectedShipment.targetMax || 8.0}°C</span>
                 </div>
 
                 <div className="relative w-full h-48 rounded-lg bg-slate-50 border border-slate-200 p-3 flex flex-col justify-between">
@@ -217,13 +323,13 @@ export default function ColdChain() {
 
                     {/* Max Threshold Line (8°C = Y: 60) */}
                     <line x1="0" y1="60" x2="400" y2="60" stroke="#EF4444" strokeWidth="1.5" strokeDasharray="6 4" />
-                    <text x="350" y="55" fill="#EF4444" fontSize="9" fontWeight="bold">Max 8°C</text>
+                    <text x="340" y="55" fill="#EF4444" fontSize="9" fontWeight="bold">Max {selectedShipment.targetMax || 8.0}°C</text>
 
                     {/* Min Threshold Line (2°C = Y: 120) */}
                     <line x1="0" y1="120" x2="400" y2="120" stroke="#0284C7" strokeWidth="1.5" strokeDasharray="6 4" />
-                    <text x="350" y="115" fill="#0284C7" fontSize="9" fontWeight="bold">Min 2°C</text>
+                    <text x="340" y="115" fill="#0284C7" fontSize="9" fontWeight="bold">Min {selectedShipment.targetMin || 2.0}°C</text>
 
-                    {/* Actual Temp Trend Line Spiking */}
+                    {/* Actual Temp Trend Line */}
                     <path
                       d="M 10 100 L 70 95 L 130 90 L 190 75 L 250 45 L 310 25 L 380 10"
                       fill="none"

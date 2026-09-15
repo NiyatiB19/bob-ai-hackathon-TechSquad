@@ -9,6 +9,8 @@ const { recommendCarrier } = require('./services/carrierRecommendationService');
 const { getAffectedShipments } = require('./services/affectedShipmentService');
 const aiRoutes = require('./routes/aiRoutes');
 const bobRoutes = require('./routes/bobRoutes');
+const fleetRoutes = require('./routes/fleetRoutes');
+const coldChainRoutes = require('./routes/coldChainRoutes');
 
 dotenv.config();
 
@@ -193,6 +195,8 @@ app.post('/api/carriers/recommend', (req, res) => {
 
 app.use('/api/ai', aiRoutes);
 app.use('/api/bob', bobRoutes);
+app.use('/api/fleet', fleetRoutes);
+app.use('/api/cold-chain', coldChainRoutes);
 
 app.use((req, res) => {
   res.status(404).json(errorResponse('NOT_FOUND', 'The requested endpoint was not found.', 404));
