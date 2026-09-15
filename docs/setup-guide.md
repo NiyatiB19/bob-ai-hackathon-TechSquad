@@ -45,8 +45,12 @@ cat docs/development-workflow.md
 
 ## Running the Application
 
-Detailed setup instructions and startup commands for individual backend services and frontend Vite dev servers will be added after implementation in Phase 4.
+### Start the Backend
 
+```bash
+cd src/backend
+npm install
+npm run dev
 ## Running Tests
 
 Independent module unit testing and mock data verification scripts:
