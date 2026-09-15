@@ -16,6 +16,25 @@ const mockDataPath = join(__dirname, '../mock/mockData.json');
 const mockData = JSON.parse(readFileSync(mockDataPath, 'utf8'));
 
 /**
+ * Attempts to load backend operational data store if available.
+ */
+async function loadOperationalStore() {
+  try {
+    const backendSampleData = await import('../../backend/mock/sampleData.js');
+    return {
+      shipments: backendSampleData.shipments || mockData.shipments,
+      disruptions: backendSampleData.disruptions || mockData.disruptions,
+      routes: backendSampleData.routes || mockData.routes,
+      fleetAssets: backendSampleData.fleetAssets || mockData.fleet || [],
+      temperatureReadings: backendSampleData.temperatureReadings || mockData.temperatureReadings || [],
+      coldChainAlerts: backendSampleData.coldChainAlerts || mockData.aiRecommendations || []
+    };
+  } catch (err) {
+    return mockData;
+  }
+}
+
+/**
  * Handles conversational queries from dispatchers via IBM Bob interface.
  *
  * @param {Object} params
@@ -31,7 +50,8 @@ export async function executeBobQuery({ prompt, userId, customContext } = {}) {
     throw error;
   }
 
-  const dataContext = customContext || mockData;
+  const defaultStore = await loadOperationalStore();
+  const dataContext = customContext || defaultStore;
   const result = processBobQuery({ prompt, dataContext });
 
   return {

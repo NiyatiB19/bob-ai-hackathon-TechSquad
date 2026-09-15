@@ -2,9 +2,9 @@
 
 ## 1. Overview & Strategic Role
 
-In **SupplyGuard AI**, IBM Bob operates as an interactive AI decision-support engine and coding agent designed to assist supply chain managers and dispatchers during major disruptions.
+In **SupplyGuard AI**, IBM Bob operates as an interactive AI decision-support engine and conversational assistant designed to assist supply chain managers and dispatchers during major disruptions, cold-chain emergencies, and fleet bottleneck events.
 
-Rather than relying on vague or hallucinated responses, IBM Bob integrates directly with SupplyGuard AI's deterministic risk scoring engines, route optimizers, fleet matchers, and cold-chain sensor streams.
+Rather than relying on ungrounded or hallucinated responses, IBM Bob integrates directly with SupplyGuard AI's deterministic risk scoring engines (`riskEngine.js`), route evaluators (`routeOptimizer.js`), fleet matchers (`fleetOptimizer.js`), and cold-chain thermal sensor streams (`coldChainService.js`).
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -28,27 +28,26 @@ Rather than relying on vague or hallucinated responses, IBM Bob integrates direc
 
 ---
 
-## 2. IBM Bob Operational Modes in SupplyGuard AI
+## 2. Distinction Between Analytical AI vs. IBM Bob Decision Support
 
-### A. Ask Mode (Operational Diagnosis & Code Base Understanding)
-- Dispatchers query live supply chain status (e.g., *"What shipments are impacted by the coastal blizzard?"*).
-- Developers inspect existing module contracts, API schemas, and mathematical scoring formulas.
+To maintain 100% auditability and data accuracy, SupplyGuard AI separates analytical computations from decision-support text synthesis:
 
-### B. Plan Mode (Strategic Rerouting & Redeployment Planning)
-- Synthesizes complex multi-factor scenarios (e.g., evaluating whether to reroute via Southern Corridor B12 vs. waiting for primary corridor clearance).
-
-### C. Agent Mode (Action Execution & Rationale Synthesis)
-- Formulates prioritized operational recommendations (`reroute_and_redeploy`, `redeploy_fleet`, `thermal_intervention`) with explicit quantitative benefits and remaining risk explanations.
+| Layer | Component | Responsibility |
+|---|---|---|
+| **Deterministic Layer** | `riskEngine.js`, `disruptionEngine.js`, `routeOptimizer.js`, `fleetOptimizer.js` | Computes mathematical risk scores (0.0 to 1.0), distance deltas (km), delay reduction (hrs), and thermal excursion flags (`temp < min` OR `temp > max`). |
+| **IBM Bob Decision Support** | `bobAdapter.js`, `bobService.js`, `bobPrompts.js` | Translates structured analytical metrics into natural-language dispatcher responses containing Situation, Risk, Rationale, Action, Expected Benefit, Remaining Risk, and Contingencies. |
 
 ---
 
-## 3. Data Grounding & Contract Integration
+## 3. Data Grounding & Anti-Hallucination Controls
 
-IBM Bob queries consume Module B and Module D contracts directly:
+IBM Bob responses consume live Module B and Module D entity contracts directly:
 
-- **Module B (Shipment + Disruption + Route):** Shipment tracking IDs, cargo priority, disruption severity, corridor availability.
+- **Module B (Shipment + Disruption + Route):** Shipment tracking IDs (`shp_2001`, `S102`), cargo types (`Vaccines`, `Pharmaceuticals`), disruption severity, corridor availability.
 - **Module C (AI Engine):** Deterministic risk scores, delay reduction hours, route risk ratings.
-- **Module D (Fleet + Cold Chain):** Idle refrigerated asset locations, proximity distances, sensor thermal excursion readings (°C).
+- **Module D (Fleet + Cold Chain):** Idle refrigerated asset locations (`T14`, `flt_5001`), proximity distances (km), sensor thermal excursion readings (°C).
+
+IBM Bob is strictly grounded in project data models and does **NOT** invent unrecorded shipment IDs, fake temperature readings, or non-existent fleet assets.
 
 ---
 
@@ -60,7 +59,7 @@ IBM Bob decision support is exposed via standard REST API:
 - **Request Body:**
   ```json
   {
-    "prompt": "What shipments are currently at highest risk?",
+    "prompt": "Which cold-chain shipment is at highest risk and what idle truck is available?",
     "userId": "usr_1001"
   }
   ```
@@ -69,22 +68,26 @@ IBM Bob decision support is exposed via standard REST API:
   {
     "success": true,
     "data": {
-      "response": "Shipment shp_2001 (mRNA Vaccines) is currently at CRITICAL risk due to severe blizzard dis_3001 and an active thermal excursion (14.2°C vs 8.0°C max). Recommended Action: Deploy idle reefer flt_5001 located in Surat (15km away) and reroute via Southern Corridor B12.",
+      "response": "🚨 Cold-Chain Emergency Analysis\n- Situation: Shipment S102 (Pharmaceuticals) is experiencing a thermal breach.\n- Current Sensor Log: 14.2°C (Required Safe Threshold: 2.0°C – 8.0°C).\n- Severity Level: CRITICAL.\n- Recommended Immediate Action: Reroute shipment S102 via Southern Bypass Corridor (B12) and redeploy idle Reefer T14.\n- Fleet Support: Deploy nearby idle refrigerated asset T14 (Location: Mumbai / Frankfurt).\n- Expected Benefit: Prevents cargo degradation by restoring thermal control within 1.2h.\n- Residual Risk: Brief exposure during cargo transfer.",
       "structuredContext": {
-        "primaryAffectedShipmentId": "shp_2001",
+        "primaryAffectedShipmentId": "S102",
         "suggestedActionType": "reroute_and_redeploy",
-        "recommendationId": "rec_2001_1773498930000",
+        "recommendationId": "rec_S102_1773498930000",
         "riskLevel": "critical",
-        "rationale": "Shipment shp_2001 is stranded by blizzard dis_3001 with active 14.2°C thermal excursion."
+        "rationale": "Active thermal excursion logged for S102."
       }
     },
-    "message": "IBM Bob response generated successfully."
+    "message": "IBM Bob query processed successfully."
   }
   ```
 
 ---
 
-## 5. Limitations & Implementation Honesty
+## 5. IBM Bob Setup & Authentication Requirements
 
-1. **No External Unsupported REST SDK:** IBM Bob logic is executed via the repository's context assembly adapter (`bobAdapter.js`) and AI synthesis engine, grounding responses in project data models. No fake external HTTP SDKs or credentials are used.
-2. **Deterministic Grounding:** All numeric risk scores, delay reductions, and proximity calculations are computed deterministically before AI synthesis.
+1. **Trial Environment Configuration:** If an official IBM Bob Trial API key is available, set `BOB_API_KEY` and `BOB_API_URL` in `.env`:
+   ```bash
+   BOB_API_URL=https://api.ibm.com/bob/v1
+   BOB_API_KEY=your_official_ibm_bob_api_key
+   ```
+2. **Context Assembly Engine:** When running in local development mode without external key configuration, SupplyGuard AI executes IBM Bob queries via the internal `bobAdapter.js` context assembler, ensuring 100% data-grounded responses without relying on unauthenticated remote calls.
