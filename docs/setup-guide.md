@@ -53,6 +53,21 @@ npm install
 npm run dev
 ## Running Tests
 
+The backend API will run on:
+
+http://localhost:5001
+Start the Frontend
+
+Open a new terminal:
+
+cd src/frontend
+npm install
+npm run dev
+
+The Vite frontend will run on:
+
+http://localhost:5173
+
 Independent module unit testing and mock data verification scripts:
 
 ```bash
