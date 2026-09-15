@@ -9,18 +9,18 @@
 # =============================================================================
 
 team:
-  name: "[TechSquad]"                             # REQUIRED — e.g., "Orion Squad"
+  name: "TechSquad"                             # REQUIRED — e.g., "Orion Squad"
   track: "AI"                            # REQUIRED — one of: AI | DevOps | Sustainability | Open
   lead:
-    name: "[Niyati Barochia]"                           # REQUIRED — e.g., "Alice Chen"
-    email: "[24dce009@charusat.edu.in]"                          # REQUIRED — e.g., "alice.chen@ibm.com"
+    name: "Niyati Barochia"                           # REQUIRED — e.g., "Alice Chen"
+    email: "24dce009@charusat.edu.in"                          # REQUIRED — e.g., "alice.chen@ibm.com"
   members:
-    - name: "[Drashti Dedaniya]"                         # REQUIRED — Team member 1
-      email: "[24dce029@charusat.edu.in]"
-    - name: "[Priyanshi Patel]"
-      email: "[24ce093@charusat.edu.in]"
-    - name: "[Palak Bhut]"
-      email: "[24ce016@charusat.edu.in]"
+    - name: "Drashti Dedaniya"                         # REQUIRED — Team member 1
+      email: "24dce029@charusat.edu.in"
+    - name: "Priyanshi Patel"
+      email: "24ce093@charusat.edu.in"
+    - name: "Palak Bhut"
+      email: "24ce016@charusat.edu.in"
 
 submission:
   title: "SupplyGuard AI"                            # REQUIRED — Project display name, e.g., "SmartOps Dashboard"
