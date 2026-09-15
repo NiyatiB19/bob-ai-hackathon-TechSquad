@@ -135,7 +135,29 @@ cp .env.example .env
 
 # 3. Reference setup guide for module execution
 cat docs/setup-guide.md
+
+# 4. Start the Backend
+cd src/backend
+npm install
+npm run dev
+
+# 5. Start the Frontend
+cd src/ai
+pip install -r requirements.txt
+python main.py
+
+# 6. Database Setup
+SupplyGuard AI uses MongoDB for storing application and supply-chain data.
+For a local MongoDB instance:
+mongod
+
+# 7. Start the AI Service
+cd src/ai
+pip install -r requirements.txt
+python main.py
+
 ```
+
 
 ---
 
