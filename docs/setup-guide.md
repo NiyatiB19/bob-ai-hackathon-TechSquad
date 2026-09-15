@@ -56,10 +56,11 @@ npm run dev
 The backend API will run on:
 
 http://localhost:5001
-Start the Frontend
+```
+### Start the Frontend
 
 Open a new terminal:
-
+```bash
 cd src/frontend
 npm install
 npm run dev
@@ -67,10 +68,21 @@ npm run dev
 The Vite frontend will run on:
 
 http://localhost:5173
+```
+Start the AI Service
 
+If the AI service is configured separately:
+```bash
+cd src/ai
+pip install -r requirements.txt
+python main.py
+
+The AI service will run on:
+
+http://localhost:8000
+```
 Independent module unit testing and mock data verification scripts:
 
-```bash
 # Verify shared mock data contracts
 node -e "console.log(require('./src/backend/mock/mockData.json').scenario)"
 ```
